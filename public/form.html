@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>公務電腦設備需求盤點調查問卷</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #005b8e;
+      --primary-dark: #004370;
+      --primary-light: #e8f4fb;
+      --accent: #00a878;
+      --accent-light: #e6f7f3;
+      --warn: #d97706;
+      --warn-light: #fef3c7;
+      --danger: #dc2626;
+      --border: #d1d5db;
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --text-muted: #6b7280;
+      --radius: 10px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, #0077b6 100%);
+      color: #fff;
+      padding: 28px 20px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .site-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+      pointer-events: none;
+    }
+    .header-brand {
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      opacity: 0.85;
+      margin-bottom: 8px;
+    }
+    .header-title {
+      font-size: clamp(1.3rem, 4vw, 1.9rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+    .header-sub {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .deadline-badge {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    /* ── Progress bar ── */
+    .progress-wrap {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .progress-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .progress-label { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
+    .progress-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+    .progress-pct { font-size: 0.8rem; color: var(--primary); font-weight: 700; min-width: 36px; text-align: right; }
+
+    /* ── Main container ── */
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    /* ── Notice box ── */
+    .notice-box {
+      background: var(--warn-light);
+      border: 1px solid #f59e0b;
+      border-left: 4px solid var(--warn);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 28px;
+    }
+    .notice-box h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--warn);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .notice-box p { font-size: 0.88rem; color: #78350f; line-height: 1.65; }
+    .notice-box .must-note {
+      margin-top: 8px;
+      font-weight: 600;
+      color: var(--danger);
+    }
+
+    /* ── Section header ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 32px 0 16px;
+    }
+    .section-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .section-info h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    .section-info p { font-size: 0.82rem; color: var(--text-muted); }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    /* ── Field group (basic info) ── */
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0;
+    }
+    .field-item {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .field-item:nth-last-child(-n+2):not(:nth-child(odd)) { border-bottom: none; }
+    .field-item:last-child { border-bottom: none; }
+    @media (min-width: 600px) {
+      .field-item { border-right: 1px solid var(--border); }
+      .field-item:nth-child(2n) { border-right: none; }
+    }
+    .field-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .required-star { color: var(--danger); font-size: 0.9em; }
+    .field-input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      padding: 8px 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .field-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0,91,142,0.12);
+    }
+    .field-input.error { border-color: var(--danger); }
+
+    /* Checkbox/Radio grid inside field-item */
+    .check-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .check-item input[type="checkbox"],
+    .check-item input[type="radio"] {
+      width: 17px;
+      height: 17px;
+      margin-top: 2px;
+      accent-color: var(--primary);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .check-item span { flex: 1; }
+
+    /* Full-width field */
+    .field-item.full { grid-column: 1 / -1; border-right: none; }
+
+    /* ── Question card ── */
+    .q-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .q-card:focus-within { box-shadow: 0 0 0 3px rgba(0,91,142,0.1), var(--shadow); }
+
+    .q-head {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid #f3f4f6;
+      background: #fafbfc;
+    }
+    .q-label {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .q-num {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--primary);
+      border-radius: 5px;
+      padding: 2px 8px;
+      white-space: nowrap;
+    }
+    .q-num.multi { background: var(--accent); }
+    .q-title {
+      font-size: 0.97rem;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+    }
+    .q-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 12px;
+      padding: 2px 9px;
+      margin-left: auto;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .q-badge.required { background: #fee2e2; color: var(--danger); }
+    .q-badge.optional { background: #f3f4f6; color: var(--text-muted); }
+    .q-badge.manager { background: var(--warn-light); color: var(--warn); }
+    .q-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    .q-body { padding: 16px 20px; }
+
+    /* Option list */
+    .option-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .option-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      font-size: 0.91rem;
+      line-height: 1.45;
+    }
+    .option-item:hover { background: var(--primary-light); border-color: #93c5fd; }
+    .option-item input[type="radio"],
+    .option-item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      margin-top: 1px;
+      accent-color: var(--primary);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .option-item.selected-radio {
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+    .option-item.selected-check {
+      background: var(--accent-light);
+      border-color: var(--accent);
+    }
+    .option-letter {
+      font-weight: 700;
+      color: var(--primary);
+      flex-shrink: 0;
+      min-width: 18px;
+    }
+    .option-text { flex: 1; }
+    .option-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Inline text input inside option */
+    .inline-input {
+      border: none;
+      border-bottom: 1.5px solid var(--border);
+      outline: none;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--text);
+      background: transparent;
+      padding: 0 4px;
+      min-width: 120px;
+      margin-left: 4px;
+      transition: border-color 0.2s;
+    }
+    .inline-input:focus { border-color: var(--primary); }
+
+    /* Textarea */
+    .q-textarea {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.93rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fff;
+      resize: vertical;
+      min-height: 100px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .q-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0,91,142,0.1);
+    }
+    .char-count { font-size: 0.75rem; color: var(--text-muted); text-align: right; margin-top: 4px; }
+
+    /* Software text area */
+    .software-input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fafbfc;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      margin-top: 8px;
+    }
+    .software-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0,91,142,0.1);
+    }
+
+    /* Error message */
+    .err-msg {
+      font-size: 0.78rem;
+      color: var(--danger);
+      margin-top: 6px;
+      display: none;
+      align-items: center;
+      gap: 4px;
+    }
+    .err-msg.show { display: flex; }
+
+    /* ── Part divider ── */
+    .part-divider {
+      margin: 36px 0 20px;
+      position: relative;
+    }
+    .part-divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--primary), transparent);
+    }
+    .part-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 6px 16px 6px 12px;
+      border-radius: 0 20px 20px 0;
+      position: relative;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Submit area ── */
+    .submit-area {
+      margin-top: 36px;
+      text-align: center;
+    }
+    .btn-submit {
+      background: linear-gradient(135deg, var(--primary), #0077b6);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 48px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,91,142,0.3);
+      transition: transform 0.15s, box-shadow 0.15s;
+      letter-spacing: 0.04em;
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,91,142,0.4);
+    }
+    .btn-submit:active { transform: translateY(0); }
+    .submit-hint {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+
+    /* ── Success overlay ── */
+    .success-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .success-overlay.show { display: flex; }
+    .success-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 36px;
+      text-align: center;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      animation: pop 0.3s ease;
+    }
+    @keyframes pop {
+      from { transform: scale(0.85); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    .success-icon {
+      font-size: 3.5rem;
+      margin-bottom: 16px;
+    }
+    .success-card h2 { font-size: 1.3rem; font-weight: 700; color: var(--accent); margin-bottom: 10px; }
+    .success-card p  { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; }
+    .btn-close-success {
+      margin-top: 24px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 32px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    /* ── Footer ── */
+    .site-footer {
+      text-align: center;
+      padding: 24px 16px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Responsive tweaks ── */
+    @media (max-width: 599px) {
+      .field-grid { grid-template-columns: 1fr; }
+      .field-item { border-right: none !important; border-bottom: 1px solid var(--border); }
+      .field-item:last-child { border-bottom: none; }
+      .container { padding: 16px 12px 60px; }
+      .q-head { padding: 14px 16px 10px; }
+      .q-body { padding: 14px 16px; }
+      .option-item { padding: 9px 12px; }
+    }
+    @media (min-width: 600px) {
+      .field-item:last-child { border-bottom: none; }
+      .field-item.last-row { border-bottom: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="header-brand">Landseed Health ｜ 健康生態系事業群</div>
+  <h1 class="header-title">公務電腦設備需求盤點調查問卷</h1>
+  <div class="header-sub">
+    <span>IT 設備配置規劃調查</span>
+  </div>
+</header>
+
+<!-- Progress -->
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <span class="progress-label">填寫進度</span>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <span class="progress-pct" id="progressPct">0%</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Notice -->
+  <div class="notice-box">
+    <h3>▎ 填寫說明</h3>
+    <p>依據集團資安強制防禦措施及公務電腦配置規範（3/27主管會議決議），本事業群將全面落實員工於上班期間僅使用公務配發設備之規定，優先於數位聯通部試行後推廣各部門。本問卷共 <strong>13題</strong>，預計填寫 <strong>3～5分鐘</strong>，填寫資料僅供設備規劃使用。</p>
+    <p class="must-note">★ 請務必完整填寫基本資料（含職級），以利主管分層彙整需求。</p>
+  </div>
+
+  <!-- 基本資料 -->
+  <div class="section-header">
+    <div class="section-icon">📋</div>
+    <div class="section-info">
+      <h2>填表人基本資料</h2>
+      <p>所有欄位均為必填</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="field-grid">
+      <!-- 員工編號 -->
+      <div class="field-item">
+        <label class="field-label" for="empId">員工編號 <span class="required-star">*</span></label>
+        <input type="text" id="empId" name="empId" class="field-input" placeholder="請輸入6位數員工編號" maxlength="6" required />
+        <div class="err-msg" id="err-empId">⚠ 請填寫員工編號</div>
+      </div>
+
+      <!-- 姓名 -->
+      <div class="field-item">
+        <label class="field-label" for="name">姓名 <span class="required-star">*</span></label>
+        <input type="text" id="name" name="name" class="field-input" placeholder="請先輸入6位數員工編號" readonly required />
+        <div class="err-msg" id="err-name">⚠ 請填寫姓名</div>
+      </div>
+
+      <!-- 所屬部門 -->
+      <div class="field-item">
+        <label class="field-label" for="dept">所屬部門 <span class="required-star">*</span></label>
+        <select id="dept" name="dept" class="field-input">
+          <option value="">── 請選擇 ──</option>
+          <option value="執行長辦公室">執行長辦公室</option>
+          <option value="健康照護部">健康照護部</option>
+          <option value="會員營運部">會員營運部</option>
+          <option value="數位聯通部">數位聯通部</option>
+        </select>
+        <div class="err-msg" id="err-dept">⚠ 請選擇所屬部門</div>
+      </div>
+
+      <!-- 所屬處室 -->
+      <div class="field-item">
+        <label class="field-label" for="division">所屬處室 <span class="required-star">*</span></label>
+        <input type="text" id="division" name="division" class="field-input" placeholder="請輸入所屬處室" required />
+        <div class="err-msg" id="err-division">⚠ 請填寫所屬處室</div>
+      </div>
+
+      <!-- 職稱 -->
+      <div class="field-item">
+        <label class="field-label" for="jobTitle">職稱 <span class="required-star">*</span></label>
+        <input type="text" id="jobTitle" name="jobTitle" class="field-input" placeholder="請輸入職稱" required />
+        <div class="err-msg" id="err-jobTitle">⚠ 請填寫職稱</div>
+      </div>
+
+      <!-- 職級 -->
+      <div class="field-item">
+        <label class="field-label" for="rank">職級 <span class="required-star">*</span></label>
+        <select id="rank" name="rank" class="field-input">
+          <option value="">── 請選擇 ──</option>
+          <option value="特級主管">特級主管</option>
+          <option value="一級主管">一級主管</option>
+          <option value="二級主管">二級主管</option>
+          <option value="一般同仁">一般同仁</option>
+        </select>
+        <div class="err-msg" id="err-rank">⚠ 請選擇職級</div>
+      </div>
+
+      <!-- 主要辦公地點 -->
+      <div class="field-item full">
+        <div class="field-label">主要辦公地點 <span class="required-star">*</span></div>
+        <div class="check-list" style="flex-direction: row; flex-wrap: wrap; gap: 8px 24px;">
+          <label class="check-item"><input type="radio" name="location" value="集團總部／事業群辦公室" /><span>集團總部／事業群辦公室</span></label>
+          <label class="check-item"><input type="radio" name="location" value="健檢中心（尊爵）" /><span>健檢中心（尊爵）</span></label>
+          <label class="check-item"><input type="radio" name="location" value="藍馨據點" /><span>藍馨據點</span></label>
+          <label class="check-item">
+            <input type="radio" name="location" value="其他" />
+            <span>其他（請填）：<input type="text" class="inline-input" id="locationOther" placeholder="請說明" style="width:140px;" /></span>
+          </label>
+        </div>
+        <div class="err-msg" id="err-location">⚠ 請選擇主要辦公地點</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PART A -->
+  <div class="part-divider"><div class="part-tag">💼 PART A &nbsp; 工作情境與設備使用現況</div></div>
+
+  <!-- Q1 -->
+  <div class="q-card">
+    <div class="q-head">
+      <div class="q-label">
+        <span class="q-num">Q1</span>
+        <span class="q-title">您目前的主要工作場域與設備使用情境為何？</span>
+        <span class="q-badge required">必填 · 單選</span>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="option-list" id="q1">
+        <label class="option-item">
+          <input type="radio" name="q1" value="A" />
+          <span class="option-letter">A.</span>
+          <span class="option-text">固定辦公室作業，使用個人配置電腦</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q1" value="B" />
+          <span class="option-letter">B.</span>
+          <span class="option-text">健檢中心或藍馨據點，主要使用院端共用公共電腦</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q1" value="C" />
+          <span class="option-letter">C.</span>
+          <span class="option-text">移動照護／外勤服務（居家、安養、陪診等），需攜帶設備</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q1" value="D" />
+          <span class="option-letter">D.</span>
+          <span class="option-text">跨場域（辦公室＋院端＋外勤皆有）</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q1" value="E" />
+          <span class="option-letter">E.</span>
+          <span class="option-text">其他：<input type="text" class="inline-input" id="q1Other" placeholder="請說明" /></span>
+        </label>
+      </div>
+      <div class="err-msg" id="err-q1">⚠ 請選擇一個選項</div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="q-card">
+    <div class="q-head">
+      <div class="q-label">
+        <span class="q-num multi">Q2</span>
+        <span class="q-title">您目前實際使用的主要設備類型？</span>
+        <span class="q-badge required">必填 · 可複選</span>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="option-list" id="q2">
+        <label class="option-item">
+          <input type="checkbox" name="q2" value="A" />
+          <span class="option-letter">A.</span>
+          <span class="option-text">個人配置桌上型電腦</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q2" value="B" />
+          <span class="option-letter">B.</span>
+          <span class="option-text">個人配置筆記型電腦</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q2" value="C" />
+          <span class="option-letter">C.</span>
+          <span class="option-text">院端／健檢中心公共電腦（非個人配置）</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q2" value="D" />
+          <span class="option-letter">D.</span>
+          <span class="option-text">平板電腦（iOS / Android）</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q2" value="E" />
+          <span class="option-letter">E.</span>
+          <span class="option-text">行動裝置（手機）處理部分公務</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q2" value="F" />
+          <span class="option-letter">F.</span>
+          <span class="option-text">目前無任何配置設備</span>
+        </label>
+      </div>
+      <div class="err-msg" id="err-q2">⚠ 請至少選擇一個選項</div>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="q-card">
+    <div class="q-head">
+      <div class="q-label">
+        <span class="q-num">Q3</span>
+        <span class="q-title">您每週需要在辦公室或主要據點以外地點執行公務的頻率？</span>
+        <span class="q-badge required">必填 · 單選</span>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="option-list" id="q3">
+        <label class="option-item">
+          <input type="radio" name="q3" value="A" />
+          <span class="option-letter">A.</span>
+          <span class="option-text">幾乎不需要（每月少於1次）</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q3" value="B" />
+          <span class="option-letter">B.</span>
+          <span class="option-text">偶爾（每月1～3次）</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q3" value="C" />
+          <span class="option-letter">C.</span>
+          <span class="option-text">頻繁（每週1次以上）</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q3" value="D" />
+          <span class="option-letter">D.</span>
+          <span class="option-text">主要工作場域即在外部，行動辦公為常態</span>
+        </label>
+      </div>
+      <div class="err-msg" id="err-q3">⚠ 請選擇一個選項</div>
+    </div>
+  </div>
+
+  <!-- PART B -->
+  <div class="part-divider"><div class="part-tag">🖥️ PART B &nbsp; 設備配置需求（個人／共用／數量）</div></div>
+
+  <!-- Q4 -->
+  <div class="q-card">
+    <div class="q-head">
+      <div class="q-label">
+        <span class="q-num">Q4</span>
+        <span class="q-title">您是否需要「個人專屬配置」設備？或使用共用設備即可？</span>
+        <span class="q-badge required">必填 · 單選</span>
+      </div>
+      <div class="q-hint">◎ 特級／一級主管建議填A，以利主管層設備規格規劃</div>
+    </div>
+    <div class="q-body">
+      <div class="option-list" id="q4">
+        <label class="option-item">
+          <input type="radio" name="q4" value="A" />
+          <span class="option-letter">A.</span>
+          <div class="option-text">
+            需要個人專屬配置設備
+            <div class="option-sub">工作性質需隨時存取個人資料/系統</div>
+          </div>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q4" value="B" />
+          <span class="option-letter">B.</span>
+          <div class="option-text">
+            共用設備即可滿足工作需求
+            <div class="option-sub">如院端公共電腦或部門共用機</div>
+          </div>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q4" value="C" />
+          <span class="option-letter">C.</span>
+          <span class="option-text">部分工作需個人設備，部分可使用共用設備</span>
+        </label>
+      </div>
+      <div class="err-msg" id="err-q4">⚠ 請選擇一個選項</div>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="q-card">
+    <div class="q-head">
+      <div class="q-label">
+        <span class="q-num multi">Q5</span>
+        <span class="q-title">若需個人配置，您偏好或需要的設備類型？</span>
+        <span class="q-badge required">必填 · 可複選</span>
+      </div>
+      <div class="q-hint">◎ 如選 C 平板，請在 Q13 補充說明使用情境（如居家照護記錄、健管諮詢展示等）</div>
+    </div>
+    <div class="q-body">
+      <div class="option-list" id="q5">
+        <label class="option-item">
+          <input type="checkbox" name="q5" value="A" />
+          <span class="option-letter">A.</span>
+          <div class="option-text">
+            桌上型電腦
+            <div class="option-sub">固定辦公、效能優先</div>
+          </div>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q5" value="B" />
+          <span class="option-letter">B.</span>
+          <div class="option-text">
+            筆記型電腦
+            <div class="option-sub">需移動彈性</div>
+          </div>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q5" value="C" />
+          <span class="option-letter">C.</span>
+          <div class="option-text">
+            平板電腦
+            <div class="option-sub">移動照護、輕型展示、外勤簡報用</div>
+          </div>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q5" value="D" />
+          <span class="option-letter">D.</span>
+          <span class="option-text">不需要個人設備，共用即可</span>
+        </label>
+      </div>
+      <div class="err-msg" id="err-q5">⚠ 請至少選擇一個選項</div>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="q-card">
+    <div class="q-head">
+      <div class="q-label">
+        <span class="q-num">Q6</span>
+        <span class="q-title">您預估本人需配置幾台設備（含個人配置＋共用計算）？</span>
+        <span class="q-badge required">必填 · 單選</span>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="option-list" id="q6">
+        <label class="option-item">
+          <input type="radio" name="q6" value="A" />
+          <span class="option-letter">A.</span>
+          <span class="option-text">不需要（使用現有院端公共設備即可）</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q6" value="B" />
+          <span class="option-letter">B.</span>
+          <span class="option-text">1台（筆電 或 桌機 或 平板，擇一）</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q6" value="C" />
+          <span class="option-letter">C.</span>
+          <span class="option-text">2台（如：辦公室桌機＋外勤平板；或筆電＋平板）</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q6" value="D" />
+          <span class="option-letter">D.</span>
+          <span class="option-text">2台以上（請於 Q13 說明原因）</span>
+        </label>
+      </div>
+      <div class="err-msg" id="err-q6">⚠ 請選擇一個選項</div>
+    </div>
+  </div>
+
+  <!-- PART C -->
+  <div class="part-divider"><div class="part-tag">🔐 PART C &nbsp; 系統存取與軟體需求</div></div>
+
+  <!-- Q7 -->
+  <div class="q-card">
+    <div class="q-head">
+      <div class="q-label">
+        <span class="q-num multi">Q7</span>
+        <span class="q-title">您的工作需使用哪些系統或平台？</span>
+        <span class="q-badge required">必填 · 可複選</span>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="option-list" id="q7">
+        <label class="option-item">
+          <input type="checkbox" name="q7" value="A" />
+          <span class="option-letter">A.</span>
+          <span class="option-text">HIS 醫療資訊系統</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q7" value="B" />
+          <span class="option-letter">B.</span>
+          <span class="option-text">ERP 企業資源規劃系統</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q7" value="C" />
+          <span class="option-letter">C.</span>
+          <span class="option-text">院內／集團網站後台管理</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q7" value="D" />
+          <span class="option-letter">D.</span>
+          <span class="option-text">電子公文系統</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q7" value="E" />
+          <span class="option-letter">E.</span>
+          <span class="option-text">KM 知識管理系統</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q7" value="F" />
+          <span class="option-letter">F.</span>
+          <span class="option-text">重要文件管理／電子簽核</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q7" value="G" />
+          <span class="option-letter">G.</span>
+          <span class="option-text">Microsoft Office（Word / Excel / PowerPoint）</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q7" value="H" />
+          <span class="option-letter">H.</span>
+          <span class="option-text">視訊會議平台（Zoom / Google Meet / Teams）</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q7" value="I" />
+          <span class="option-letter">I.</span>
+          <span class="option-text">設計或多媒體工具（Adobe / Canva 等）</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q7" value="J" />
+          <span class="option-letter">J.</span>
+          <span class="option-text">其他：<input type="text" class="inline-input" id="q7Other" placeholder="請說明" /></span>
+        </label>
+      </div>
+      <div class="err-msg" id="err-q7">⚠ 請至少選擇一個選項</div>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="q-card">
+    <div class="q-head">
+      <div class="q-label">
+        <span class="q-num">Q8</span>
+        <span class="q-title">上列系統中，您是否需要在主要辦公場所以外進行存取？</span>
+        <span class="q-badge required">必填 · 單選</span>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="option-list" id="q8">
+        <label class="option-item">
+          <input type="radio" name="q8" value="A" />
+          <span class="option-letter">A.</span>
+          <span class="option-text">不需要，僅在辦公室內或院端公共電腦使用</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q8" value="B" />
+          <span class="option-letter">B.</span>
+          <span class="option-text">偶爾需要查閱（唯讀為主）</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q8" value="C" />
+          <span class="option-letter">C.</span>
+          <span class="option-text">經常需要，包含資料輸入與處理</span>
+        </label>
+      </div>
+      <div class="err-msg" id="err-q8">⚠ 請選擇一個選項</div>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="q-card">
+    <div class="q-head">
+      <div class="q-label">
+        <span class="q-num">Q9</span>
+        <span class="q-title">您是否使用需授權的特殊軟體（非一般辦公套裝）？</span>
+        <span class="q-badge required">必填 · 單選</span>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="option-list" id="q9">
+        <label class="option-item">
+          <input type="radio" name="q9" value="A" />
+          <span class="option-letter">A.</span>
+          <span class="option-text">無，使用一般辦公套裝及集團標準系統即可</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q9" value="B" />
+          <span class="option-letter">B.</span>
+          <span class="option-text">有，請填寫↓</span>
+        </label>
+      </div>
+      <div id="q9SoftwareWrap" style="display:none; margin-top:12px;">
+        <label style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">軟體名稱／用途</label>
+        <input type="text" id="q9Software" class="software-input" placeholder="例：Adobe Illustrator（設計稿製作）、AutoCAD（工程圖繪製）" />
+      </div>
+      <div class="err-msg" id="err-q9">⚠ 請選擇一個選項</div>
+      <div class="err-msg" id="err-q9software">⚠ 請填寫特殊軟體名稱／用途</div>
+    </div>
+  </div>
+
+  <!-- PART D -->
+  <div class="part-divider"><div class="part-tag">🖨️ PART D &nbsp; 週邊配備與主管階段補充</div></div>
+
+  <!-- Q10 -->
+  <div class="q-card">
+    <div class="q-head">
+      <div class="q-label">
+        <span class="q-num multi">Q10</span>
+        <span class="q-title">您目前工作是否需要攜帶設備至外部地點執行任務？</span>
+        <span class="q-badge required">必填 · 可複選</span>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="option-list" id="q10">
+        <label class="option-item">
+          <input type="checkbox" name="q10" value="A" />
+          <span class="option-letter">A.</span>
+          <span class="option-text">不適用</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q10" value="B" />
+          <span class="option-letter">B.</span>
+          <span class="option-text">其他院區／集團分支機構</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q10" value="C" />
+          <span class="option-letter">C.</span>
+          <span class="option-text">個案現場（居家照護、安養機構、陪診）</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q10" value="D" />
+          <span class="option-letter">D.</span>
+          <span class="option-text">外部會議（政府機關、合作單位、醫療院所）</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q10" value="E" />
+          <span class="option-letter">E.</span>
+          <span class="option-text">其他：<input type="text" class="inline-input" id="q10Other" placeholder="請說明" /></span>
+        </label>
+      </div>
+      <div class="err-msg" id="err-q10">⚠ 請至少選擇一個選項</div>
+    </div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="q-card">
+    <div class="q-head">
+      <div class="q-label">
+        <span class="q-num multi">Q11</span>
+        <span class="q-title">您是否有外接設備或週邊需求？</span>
+        <span class="q-badge required">必填 · 可複選</span>
+      </div>
+      <div class="q-hint">◎ 選擇 A 選項外，請在 Q13 補充說明使用情境</div>
+    </div>
+    <div class="q-body">
+      <div class="option-list" id="q11">
+        <label class="option-item">
+          <input type="checkbox" name="q11" value="A" />
+          <span class="option-letter">A.</span>
+          <span class="option-text">無特殊需求</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q11" value="B" />
+          <span class="option-letter">B.</span>
+          <span class="option-text">外接顯示器（雙螢幕作業）</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q11" value="C" />
+          <span class="option-letter">C.</span>
+          <span class="option-text">印表機／掃描機</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q11" value="D" />
+          <span class="option-letter">D.</span>
+          <span class="option-text">外接硬碟或儲存裝置</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q11" value="E" />
+          <span class="option-letter">E.</span>
+          <span class="option-text">其他：<input type="text" class="inline-input" id="q11Other" placeholder="請說明" /></span>
+        </label>
+      </div>
+      <div class="err-msg" id="err-q11">⚠ 請至少選擇一個選項</div>
+    </div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="q-card" style="border-color: #f59e0b;">
+    <div class="q-head" style="background: var(--warn-light);">
+      <div class="q-label">
+        <span class="q-num" style="background: var(--warn);">Q12</span>
+        <span class="q-title">您所轄團隊的整體設備需求概況？</span>
+        <span class="q-badge manager">主管專填 · 可複選</span>
+      </div>
+      <div class="q-hint">◎ 此題供主管就所管轄範圍整體評估，有助資訊處優化設備配置規劃。一般同仁免填。</div>
+    </div>
+    <div class="q-body">
+      <div class="option-list" id="q12">
+        <label class="option-item">
+          <input type="checkbox" name="q12" value="A" />
+          <span class="option-letter">A.</span>
+          <span class="option-text">全員固定辦公，統一配置桌機即可</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q12" value="B" />
+          <span class="option-letter">B.</span>
+          <span class="option-text">部分同仁需要筆電以支援外勤或跨場域工作</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q12" value="C" />
+          <span class="option-letter">C.</span>
+          <span class="option-text">有同仁需配置平板（移動照護、健管諮詢或現場展示）</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q12" value="D" />
+          <span class="option-letter">D.</span>
+          <span class="option-text">有同仁使用院端公共電腦，不需另行個人配置</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" name="q12" value="E" />
+          <span class="option-letter">E.</span>
+          <span class="option-text">需跨場域設備組合（如辦公室桌機＋外勤平板）</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="q-card">
+    <div class="q-head">
+      <div class="q-label">
+        <span class="q-num" style="background: var(--text-muted);">Q13</span>
+        <span class="q-title">目前設備使用痛點、特殊工作需求，或對本次配置的補充說明</span>
+        <span class="q-badge optional">選填</span>
+      </div>
+      <div class="q-hint">◎ 例：需雙螢幕處理大量報表；院端公共電腦無法登入個人帳號導致工作受阻；外勤時平板用於居家個案記錄等</div>
+    </div>
+    <div class="q-body">
+      <textarea
+        id="q13"
+        class="q-textarea"
+        placeholder="請輸入補充說明（選填）..."
+        maxlength="500"
+        rows="5"
+        oninput="document.getElementById('q13count').textContent = this.value.length"
+      ></textarea>
+      <div class="char-count"><span id="q13count">0</span> / 500</div>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-area">
+    <button type="button" class="btn-submit" onclick="submitForm()">提交問卷</button>
+    <p class="submit-hint">填寫完畢後請確認所有必填項目均已完成，再按下提交。</p>
+  </div>
+
+</div>
+
+<!-- Success overlay -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <h2>問卷提交成功！</h2>
+    <p>感謝您的填寫配合。您的回覆已記錄，調查結果將依職級分層彙整，直接作為主管核決設備配置與預算之依據。</p>
+    <p style="margin-top:8px;">如有填寫疑問，請洽資訊處窗口。</p>
+    <button class="btn-close-success" onclick="document.getElementById('successOverlay').classList.remove('show')">關閉</button>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="site-footer">
+  Landseed Health ｜ 資訊處 IT Dept. &nbsp;·&nbsp; 本問卷資料僅供設備規劃使用
+</footer>
+
+<script>
+  // ── Option visual selection ──
+  document.querySelectorAll('.option-item').forEach(item => {
+    const input = item.querySelector('input');
+    if (!input) return;
+
+    const update = () => {
+      if (input.type === 'radio') {
+        const siblings = document.querySelectorAll(`input[name="${input.name}"]`);
+        siblings.forEach(s => s.closest('.option-item')?.classList.remove('selected-radio'));
+        if (input.checked) item.classList.add('selected-radio');
+      } else {
+        item.classList.toggle('selected-check', input.checked);
+      }
+    };
+
+    input.addEventListener('change', () => {
+      update();
+      updateProgress();
+      clearErr(input.name);
+    });
+  });
+
+  // Q9 software reveal
+  document.querySelectorAll('input[name="q9"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const wrap = document.getElementById('q9SoftwareWrap');
+      wrap.style.display = r.value === 'B' && r.checked ? 'block' : 'none';
+      if (r.value !== 'B') document.getElementById('q9Software').value = '';
+    });
+  });
+
+  // ── Progress ──
+  const requiredFields = ['name','empId','division','jobTitle','jobTitle',
+    'dept','rank','location',
+    'q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11'];
+
+  function updateProgress() {
+    let done = 0;
+    // text inputs
+    ['name','empId','division','jobTitle'].forEach(id => {
+      if (document.getElementById(id)?.value.trim()) done++;
+    });
+    // select dropdowns (basic info)
+    ['dept','rank'].forEach(id => {
+      if (document.getElementById(id)?.value) done++;
+    });
+    // radio groups (basic info + questions)
+    ['location','q1','q3','q4','q6','q8','q9'].forEach(name => {
+      if (document.querySelector(`input[name="${name}"]:checked`)) done++;
+    });
+    // checkbox groups
+    ['q2','q5','q7','q10','q11'].forEach(name => {
+      if (document.querySelector(`input[name="${name}"]:checked`)) done++;
+    });
+
+    const total = 4 + 9 + 5; // 18 required fields
+    const pct = Math.round((done / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+  }
+
+  // ── Employee lookup ──
+  const EMP_MAP = {"014718":"蔡淳娟","016211":"吳佳軒","000587":"李振華","016215":"劉俐廷","016155":"劉淑鈺","016059":"劉堯倫","016105":"蔡欣容","015590":"李沛璇","014602":"涂世柏","016206":"卓亞仟","010227":"蘇育霆","016074":"吳莉婕","016202":"林羿伶","016173":"吳文鈺","016139":"楊舒涵","016180":"王諾嫻","015897":"陳婉騏","016092":"湯文愷","016148":"張濱璿","006728":"王正慧","013838":"李孟華","010252":"林縈縈","015572":"姚婷孆","009218":"徐碧蓮","010382":"高玉萍","006970":"陳玟孜","007818":"黃依婷","015847":"蔣宛臻","013550":"蔡佩儒","006556":"李韶菁","005868":"黃子庭","014676":"楊渝舒","009161":"楊琬琳","016178":"蕭靜儀","016225":"王汶汶","016050":"王庭軒","016068":"呂慈恩","016052":"林衛青","016172":"許雅卿","006748":"陳慕貞","016109":"葉子晴","016099":"劉秋香","016069":"羅曉荷","010602":"王志玄","015449":"王嘉玲","013784":"白雅文","010150":"江婕寧","013579":"呂雅雯","016179":"李懿文","002069":"林家鈴","010652":"邱雅慧","007821":"郭惠敏","016108":"陳怡君","010657":"陳淑芬","010846":"陳雅雪","009990":"曾巧君","006910":"曾愛婷","016192":"湯育維","016182":"黃采葳","015262":"劉琬婷","015762":"蔡恒淑","008500":"張美琪","016212":"陳昱瑾","016067":"劉羽婷","015561":"劉采靖","016080":"鄭婷方","014693":"豐月華","016194":"洪麗虹","016193":"黃莉潔","001157":"劉慧音","201298":"蔡曉鸞","005357":"簡珍宜","014425":"張司憲","014504":"王彥錞","015779":"凌國菁","015229":"徐婉庭","016012":"張婉菱","016009":"鄭燕倩","004073":"方麗萍","016130":"王美芳","014452":"王麗鳳","014052":"吳念祖","015102":"宋佳蓁","010394":"李玉霜","010397":"李阿金","015376":"林合立","014210":"林婉如","010853":"林慈暉","014292":"林聖翔","013241":"邱于倫","014864":"唐翊耘","010804":"徐筠茜","015101":"馬韻蘭","015721":"高瑋婷","016110":"張育容","016160":"張律均","016238":"張筱柔","016213":"郭奕瑄","013548":"陳宇鉉","015389":"陳依妲","014638":"陳佳琪","015171":"陳昭明","015060":"陳映諳","013597":"彭美鳳","014066":"湯英華","015766":"馮秀霞","016111":"黃美枝","015332":"黃莉雯","014721":"黃群善","014477":"黃麗美","014457":"葉朝蓉","013360":"葉麗萍","014479":"詹穎喬","014905":"鄒美麗","014832":"劉桂琴","013101":"黎氏碧","014454":"蕭又銨","016028":"羅碧婷","014138":"温勝琪","016239":"李佩真","014499":"林雪英","015438":"林嘉玲","016100":"邱綺薇","003882":"洪昀秀","016189":"陳妍如","014516":"陳思頴","016079":"黃可欣","009744":"鍾咏倪","014675":"羅嘉珊","015688":"朱鳳琪","015524":"陳金秋","007512":"林宜姍","009390":"張儀君","014769":"陳昱蓉","014470":"葉玉先","007621":"葉怡君"};
+
+  const empIdInput = document.getElementById('empId');
+  const nameInput  = document.getElementById('name');
+
+  empIdInput.addEventListener('input', () => {
+    const id = empIdInput.value.trim();
+    if (id.length < 6) {
+      nameInput.value = '';
+      nameInput.style.background = '';
+      nameInput.style.color = '';
+      nameInput.placeholder = '請先輸入6位數員工編號';
+      clearErr('name');
+      markInputErr('name', false);
+    } else {
+      const matched = EMP_MAP[id];
+      if (matched) {
+        nameInput.value = matched;
+        nameInput.style.background = '#f0f9ff';
+        nameInput.style.color = '#0369a1';
+        nameInput.placeholder = '';
+        clearErr('name');
+        markInputErr('name', false);
+      } else {
+        nameInput.value = '找不到資料';
+        nameInput.style.background = '#fff1f2';
+        nameInput.style.color = '#dc2626';
+        nameInput.placeholder = '';
+      }
+    }
+    updateProgress();
+    clearErr('empId');
+    markInputErr('empId', false);
+  });
+
+  // Text inputs also update progress
+  ['name','empId','division','jobTitle'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updateProgress);
+  });
+
+  // Select dropdowns update progress
+  ['dept','rank'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+      updateProgress();
+      clearErr(id);
+      markInputErr(id, false);
+    });
+  });
+
+  // ── Error helpers ──
+  function showErr(id) { document.getElementById('err-' + id)?.classList.add('show'); }
+  function clearErr(id) { document.getElementById('err-' + id)?.classList.remove('show'); }
+  function markInputErr(id, isErr) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('error', isErr);
+  }
+
+  // ── Submit ──
+  async function submitForm() {
+    let valid = true;
+
+    // Text fields
+    ['name','empId','division','jobTitle'].forEach(id => {
+      const val = document.getElementById(id)?.value.trim();
+      const ok = !!val;
+      markInputErr(id, !ok);
+      if (!ok) { showErr(id); valid = false; } else clearErr(id);
+    });
+
+    // Select dropdowns (basic info)
+    ['dept','rank'].forEach(id => {
+      const ok = !!document.getElementById(id)?.value;
+      markInputErr(id, !ok);
+      if (!ok) { showErr(id); valid = false; } else clearErr(id);
+    });
+
+    // Required radio groups
+    ['location','q1','q3','q4','q6','q8','q9'].forEach(name => {
+      const ok = !!document.querySelector(`input[name="${name}"]:checked`);
+      if (!ok) { showErr(name); valid = false; } else clearErr(name);
+    });
+
+    // Required checkbox groups
+    ['q2','q5','q7','q10','q11'].forEach(name => {
+      const ok = !!document.querySelector(`input[name="${name}"]:checked`);
+      if (!ok) { showErr(name); valid = false; } else clearErr(name);
+    });
+
+    // Q9 software field
+    const q9B = document.querySelector('input[name="q9"][value="B"]:checked');
+    if (q9B) {
+      const sw = document.getElementById('q9Software')?.value.trim();
+      if (!sw) { showErr('q9software'); valid = false; } else clearErr('q9software');
+    } else { clearErr('q9software'); }
+
+    if (!valid) {
+      // scroll to first error
+      const firstErr = document.querySelector('.err-msg.show, .field-input.error');
+      firstErr?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    // Collect data
+    const data = {
+      name: document.getElementById('name').value.trim(),
+      empId: document.getElementById('empId').value.trim(),
+      dept: document.getElementById('dept').value,
+      division: document.getElementById('division').value.trim(),
+      jobTitle: document.getElementById('jobTitle').value.trim(),
+      rank: document.getElementById('rank').value,
+      location: document.querySelector('input[name="location"]:checked')?.value,
+      locationOther: document.getElementById('locationOther').value.trim(),
+      q1: document.querySelector('input[name="q1"]:checked')?.value,
+      q1Other: document.getElementById('q1Other').value.trim(),
+      q2: [...document.querySelectorAll('input[name="q2"]:checked')].map(i=>i.value),
+      q3: document.querySelector('input[name="q3"]:checked')?.value,
+      q4: document.querySelector('input[name="q4"]:checked')?.value,
+      q5: [...document.querySelectorAll('input[name="q5"]:checked')].map(i=>i.value),
+      q6: document.querySelector('input[name="q6"]:checked')?.value,
+      q7: [...document.querySelectorAll('input[name="q7"]:checked')].map(i=>i.value),
+      q7Other: document.getElementById('q7Other').value.trim(),
+      q8: document.querySelector('input[name="q8"]:checked')?.value,
+      q9: document.querySelector('input[name="q9"]:checked')?.value,
+      q9Software: document.getElementById('q9Software').value.trim(),
+      q10: [...document.querySelectorAll('input[name="q10"]:checked')].map(i=>i.value),
+      q10Other: document.getElementById('q10Other').value.trim(),
+      q11: [...document.querySelectorAll('input[name="q11"]:checked')].map(i=>i.value),
+      q11Other: document.getElementById('q11Other').value.trim(),
+      q12: [...document.querySelectorAll('input[name="q12"]:checked')].map(i=>i.value),
+      q13: document.getElementById('q13').value.trim(),
+      submittedAt: new Date().toISOString(),
+    };
+
+    try {
+      const resp = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!resp.ok) throw new Error('伺服器錯誤');
+      document.getElementById('progressFill').style.width = '100%';
+      document.getElementById('progressPct').textContent = '100%';
+      document.getElementById('successOverlay').classList.add('show');
+    } catch (err) {
+      alert('送出失敗，請稍後再試。\n' + err);
+    }
+  }
+</script>
+</body>
+</html>
