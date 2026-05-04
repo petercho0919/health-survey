@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>後台管理｜公務電腦需求盤點</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:      #005b8e;
+      --primary-dark: #004370;
+      --primary-light:#e8f4fb;
+      --accent:       #00a878;
+      --accent-light: #e6f7f3;
+      --warn:         #d97706;
+      --warn-light:   #fef3c7;
+      --danger:       #dc2626;
+      --danger-light: #fee2e2;
+      --border:       #e5e7eb;
+      --bg:           #f0f2f5;
+      --card:         #ffffff;
+      --text:         #1f2937;
+      --text-muted:   #6b7280;
+      --sidebar-w:    220px;
+      --radius:       10px;
+      --shadow:       0 2px 8px rgba(0,0,0,0.08);
+      --shadow-lg:    0 8px 28px rgba(0,0,0,0.14);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Noto Sans TC','Microsoft JhengHei','PingFang TC',sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+
+    /* ══ Layout shell ══ */
+    .shell { display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--primary-dark);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 200;
+      transition: transform 0.3s;
+    }
+    .sidebar-logo {
+      padding: 22px 20px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .sidebar-logo .brand { font-size: 0.72rem; opacity: 0.65; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .sidebar-logo .title { font-size: 0.95rem; font-weight: 700; line-height: 1.3; }
+    .sidebar-logo .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border-radius: 4px;
+      font-size: 0.68rem;
+      padding: 1px 7px;
+      margin-top: 5px;
+      letter-spacing: 0.05em;
+    }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-section { padding: 10px 16px 4px; font-size: 0.67rem; color: rgba(255,255,255,0.45); letter-spacing: 0.08em; text-transform: uppercase; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 20px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+    }
+    .nav-item:hover  { background: rgba(255,255,255,0.08); color: #fff; }
+    .nav-item.active { background: rgba(255,255,255,0.12); border-color: #fff; color: #fff; font-weight: 600; }
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+    .sidebar-footer {
+      padding: 14px 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.45);
+    }
+
+    /* ── Main content ── */
+    .main {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      color: var(--text);
+      padding: 4px;
+    }
+    .page-breadcrumb { font-size: 0.9rem; color: var(--text-muted); }
+    .page-breadcrumb strong { color: var(--text); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .topbar-export {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      padding: 7px 16px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .topbar-export:hover { background: var(--primary-dark); }
+
+    /* ── Page body ── */
+    .page-body { padding: 24px 28px 48px; }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .stat-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .stat-icon.blue   { background: var(--primary-light); }
+    .stat-icon.green  { background: var(--accent-light); }
+    .stat-icon.yellow { background: var(--warn-light); }
+    .stat-icon.red    { background: var(--danger-light); }
+    .stat-value { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 20px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .filter-bar .search-wrap {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+    .filter-bar .search-icon {
+      position: absolute;
+      left: 10px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+    .filter-input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      padding: 7px 12px 7px 32px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .filter-input:focus { border-color: var(--primary); }
+    .filter-select {
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      padding: 7px 12px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .filter-select:focus { border-color: var(--primary); }
+    .filter-count {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+    .filter-count strong { color: var(--primary); }
+
+    /* ── Table card ── */
+    .table-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      min-width: 900px;
+    }
+    thead tr { background: #f8f9fb; border-bottom: 2px solid var(--border); }
+    th {
+      padding: 11px 14px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      user-select: none;
+    }
+    th.sortable { cursor: pointer; }
+    th.sortable:hover { color: var(--primary); }
+    th .sort-icon { margin-left: 4px; opacity: 0.5; }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafbfc; }
+    td { padding: 11px 14px; vertical-align: middle; }
+
+    /* Clickable name/empId */
+    .link-cell {
+      color: var(--primary);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .link-cell:hover { color: var(--primary-dark); text-decoration: underline; }
+
+    /* Rank badge */
+    .rank-badge {
+      display: inline-block;
+      border-radius: 5px;
+      padding: 2px 9px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .rank-special { background: #ede9fe; color: #5b21b6; }
+    .rank-1       { background: #dbeafe; color: #1d4ed8; }
+    .rank-2       { background: #dcfce7; color: #15803d; }
+    .rank-general { background: #f3f4f6; color: #4b5563; }
+
+    /* Q answer chips */
+    .chip-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+    .chip {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .chip.green { background: var(--accent-light); color: #047857; }
+    .chip.yellow { background: var(--warn-light); color: #92400e; }
+    .chip.gray { background: #f3f4f6; color: #4b5563; }
+
+    /* 建議配發筆電 select */
+    .laptop-select {
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 0.82rem;
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
+      font-weight: 600;
+      transition: border-color 0.2s;
+      min-width: 88px;
+    }
+    .laptop-select:focus { border-color: var(--primary); }
+    .laptop-select.yes    { background: #dcfce7; color: #15803d; border-color: #86efac; }
+    .laptop-select.no     { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+    .laptop-select.pending{ background: var(--warn-light); color: #92400e; border-color: #fcd34d; }
+
+    /* Delete btn */
+    .btn-del {
+      background: none;
+      border: 1.5px solid #fca5a5;
+      color: var(--danger);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .btn-del:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .empty-icon { font-size: 2.8rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ══ Detail Modal ══ */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.48);
+      z-index: 1000;
+      align-items: flex-start;
+      justify-content: flex-end;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-panel {
+      background: var(--card);
+      width: min(680px, 100vw);
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: -8px 0 32px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      animation: slideIn 0.28s ease;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+
+    .modal-head {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: #fff;
+      padding: 20px 24px 18px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .modal-head-info { flex: 1; }
+    .modal-head .name { font-size: 1.25rem; font-weight: 700; }
+    .modal-head .meta { font-size: 0.8rem; opacity: 0.8; margin-top: 3px; }
+    .modal-close {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: #fff;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.35); }
+
+    .modal-body { padding: 24px; flex: 1; }
+
+    /* Detail sections */
+    .detail-section { margin-bottom: 24px; }
+    .detail-section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+      margin-bottom: 14px;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .detail-field {}
+    .detail-field .lbl {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    .detail-field .val {
+      font-size: 0.9rem;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .detail-field .val.empty { color: var(--text-muted); font-style: italic; }
+
+    /* Q&A row */
+    .qa-row {
+      display: flex;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f3f4f6;
+      align-items: flex-start;
+    }
+    .qa-row:last-child { border-bottom: none; }
+    .qa-num {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--primary);
+      border-radius: 4px;
+      padding: 2px 7px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .qa-num.multi { background: var(--accent); }
+    .qa-num.opt   { background: var(--text-muted); }
+    .qa-num.mgr   { background: var(--warn); }
+    .qa-content { flex: 1; }
+    .qa-q { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px; }
+    .qa-a { font-size: 0.9rem; color: var(--text); font-weight: 500; }
+    .qa-a .chip-wrap { margin-top: 2px; }
+
+    /* Laptop recommendation in modal */
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      background: #fafbfc;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      bottom: 0;
+    }
+    .modal-footer-label { font-size: 0.85rem; font-weight: 600; }
+    .modal-footer-right { display: flex; align-items: center; gap: 10px; }
+    .submitted-at { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ══ Confirm dialog ══ */
+    .confirm-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .confirm-overlay.open { display: flex; }
+    .confirm-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 28px 28px 24px;
+      max-width: 380px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+      animation: pop 0.22s ease;
+    }
+    @keyframes pop {
+      from { transform: scale(0.88); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    .confirm-icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .confirm-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+    .confirm-msg { font-size: 0.87rem; color: var(--text-muted); margin-bottom: 20px; }
+    .confirm-btns { display: flex; gap: 10px; justify-content: center; }
+    .btn-cancel {
+      border: 1.5px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 22px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .btn-confirm-del {
+      background: var(--danger);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 22px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    /* ══ Toast ══ */
+    .toast-wrap {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      z-index: 3000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--text);
+      color: #fff;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 0.86rem;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: toastIn 0.25s ease;
+      opacity: 1;
+      transition: opacity 0.4s;
+    }
+    .toast.success { background: var(--accent); }
+    .toast.danger  { background: var(--danger); }
+    @keyframes toastIn {
+      from { transform: translateY(16px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* ══ Score badge ══ */
+    .score-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: default;
+    }
+    .score-high   { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .score-mid    { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+    .score-low    { background: var(--warn-light); color: #92400e; border: 1px solid #fcd34d; }
+    .score-none   { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+    /* Score breakdown in modal */
+    .score-panel {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 20px;
+    }
+    .score-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .score-panel-title { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    .score-total-badge {
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .score-verdict {
+      font-size: 0.78rem;
+      font-weight: 700;
+      border-radius: 6px;
+      padding: 3px 10px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .score-rows { display: flex; flex-direction: column; gap: 6px; }
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+    }
+    .score-row-label { flex: 1; color: var(--text-muted); }
+    .score-row-pts {
+      font-weight: 700;
+      min-width: 36px;
+      text-align: right;
+      color: var(--text);
+    }
+    .score-row-bar-bg {
+      width: 80px;
+      height: 5px;
+      background: #e5e7eb;
+      border-radius: 99px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .score-row-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--primary);
+      transition: width 0.4s;
+    }
+    .score-adj-row {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.79rem;
+      color: var(--text-muted);
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+      margin-top: 4px;
+    }
+    .adj-plus  { color: var(--accent); font-weight: 700; }
+    .adj-minus { color: var(--danger); font-weight: 700; }
+
+    /* Batch assess button */
+    .btn-batch {
+      background: #fff;
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+      border-radius: 7px;
+      padding: 7px 14px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-batch:hover { background: var(--primary); color: #fff; }
+
+    /* ══ Pagination ══ */
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 20px;
+      border-top: 1px solid var(--border);
+      background: #fafbfc;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 54px;
+    }
+    .pagination-info { font-size: 0.82rem; color: var(--text-muted); }
+    .pagination-btns { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .page-btn {
+      min-width: 34px;
+      height: 34px;
+      border: 1.5px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 10px;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .page-btn:hover:not(:disabled) { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+    .page-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; cursor: default; }
+    .page-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+    .page-ellipsis { color: var(--text-muted); padding: 0 4px; font-size: 0.85rem; line-height: 34px; }
+
+    /* ══ Scoring page ══ */
+    .score-page { max-width: 860px; }
+    .score-page-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 4px;
+    }
+    .score-page-sub { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 28px; }
+
+    /* Dimension cards row */
+    .dim-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+    .dim-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--primary);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 18px;
+    }
+    .dim-card.b { border-top-color: var(--accent); }
+    .dim-card.c { border-top-color: var(--warn); }
+    .dim-card.d { border-top-color: #8b5cf6; }
+    .dim-card-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+    .dim-card-name { font-size: 0.97rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .dim-card-q { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+    .dim-card-score {
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
+    }
+    .dim-card-score .max { font-size: 1.6rem; font-weight: 800; color: var(--primary); }
+    .dim-card.b .dim-card-score .max { color: var(--accent); }
+    .dim-card.c .dim-card-score .max { color: var(--warn); }
+    .dim-card.d .dim-card-score .max { color: #8b5cf6; }
+    .dim-card-score .unit { font-size: 0.82rem; color: var(--text-muted); }
+
+    /* Scoring detail card */
+    .scoring-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .scoring-card-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: #fafbfc;
+    }
+    .scoring-card-icon {
+      width: 36px; height: 36px;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      background: var(--primary-light);
+    }
+    .scoring-card-icon.green  { background: var(--accent-light); }
+    .scoring-card-icon.yellow { background: var(--warn-light); }
+    .scoring-card-icon.purple { background: #ede9fe; }
+    .scoring-card-title { font-size: 0.97rem; font-weight: 700; }
+    .scoring-card-max   { font-size: 0.8rem; color: var(--text-muted); margin-left: auto; }
+
+    /* Scoring table inside card */
+    .score-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .score-tbl th {
+      background: #f8f9fb;
+      padding: 9px 16px;
+      text-align: left;
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--border);
+    }
+    .score-tbl td {
+      padding: 10px 16px;
+      border-bottom: 1px solid #f3f4f6;
+      vertical-align: middle;
+    }
+    .score-tbl tr:last-child td { border-bottom: none; }
+    .score-tbl tr:hover td { background: #fafbfc; }
+    .score-pts {
+      font-weight: 700;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+    .score-pts.zero { color: var(--text-muted); font-weight: 400; }
+    .score-pts.high { color: #15803d; }
+    .score-pts.plus { color: var(--accent); }
+    .score-pts.minus { color: var(--danger); }
+    .option-code {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 4px;
+      padding: 1px 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    /* Threshold table */
+    .threshold-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .threshold-item {
+      border-radius: 9px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .threshold-item.t1 { background: #dcfce7; border: 1px solid #86efac; }
+    .threshold-item.t2 { background: #dbeafe; border: 1px solid #93c5fd; }
+    .threshold-item.t3 { background: var(--warn-light); border: 1px solid #fcd34d; }
+    .threshold-item.t4 { background: #fee2e2; border: 1px solid #fca5a5; }
+    .threshold-score { font-size: 1.1rem; font-weight: 800; white-space: nowrap; }
+    .threshold-item.t1 .threshold-score { color: #15803d; }
+    .threshold-item.t2 .threshold-score { color: #1d4ed8; }
+    .threshold-item.t3 .threshold-score { color: #92400e; }
+    .threshold-item.t4 .threshold-score { color: #b91c1c; }
+    .threshold-label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .threshold-desc  { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+    .section-h2 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin: 28px 0 12px;
+    }
+
+    /* ══ Mobile overlay for sidebar ══ */
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 190;
+    }
+
+    /* ══ Responsive ══ */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+      .main { margin-left: 0; }
+      .hamburger { display: flex; }
+      .page-body { padding: 16px 14px 40px; }
+      .topbar { padding: 0 14px; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .modal-panel { width: 100vw; }
+    }
+    @media (max-width: 480px) {
+      .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-value { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">Landseed Health</div>
+      <div class="title">健康生態系事業群</div>
+      <div class="badge">IT 設備管理後台</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">主要功能</div>
+      <a class="nav-item active" data-nav="survey" href="#" onclick="navigate('survey');return false;">
+        <span class="nav-icon">📊</span> 問卷回覆管理
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">💻</span> 設備配置總覽
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">📁</span> 部門彙整報表
+      </a>
+      <div class="nav-section">說明文件</div>
+      <a class="nav-item" data-nav="scoring" href="#" onclick="navigate('scoring');return false;">
+        <span class="nav-icon">📋</span> 評分方式說明
+      </a>
+      <div class="nav-section">設定</div>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">⚙️</span> 系統設定
+      </a>
+    </nav>
+    <div class="sidebar-footer">資訊處 IT Dept.</div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <div class="page-breadcrumb">
+          IT 設備管理 &nbsp;/&nbsp; <strong id="pageBreadcrumb">問卷回覆管理</strong>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-export" id="btnExport" onclick="exportCSV()">⬇ 匯出 CSV</button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div id="page-survey" data-page="survey">
+    <div class="page-body">
+
+      <!-- Stats -->
+      <div class="stats-row" id="statsRow">
+        <!-- rendered by JS -->
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="filter-input" id="searchInput" placeholder="搜尋姓名、員工編號、處室…" oninput="applyFilter()" />
+        </div>
+        <select class="filter-select" id="filterDept" onchange="applyFilter()">
+          <option value="">所有部門</option>
+          <option>執行長辦公室</option>
+          <option>健康照護部</option>
+          <option>會員營運部</option>
+          <option>數位聯通部</option>
+        </select>
+        <select class="filter-select" id="filterRank" onchange="applyFilter()">
+          <option value="">所有職級</option>
+          <option>特級主管</option>
+          <option>一級主管</option>
+          <option>二級主管</option>
+          <option>一般同仁</option>
+        </select>
+        <select class="filter-select" id="filterLaptop" onchange="applyFilter()">
+          <option value="">建議配發：全部</option>
+          <option value="yes">是</option>
+          <option value="no">否</option>
+          <option value="pending">待評估</option>
+        </select>
+        <span class="filter-count" id="filterCount"></span>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <div class="table-wrap">
+          <table id="mainTable">
+            <thead>
+              <tr>
+                <th>姓名</th>
+                <th>員工編號</th>
+                <th>部門</th>
+                <th>處室</th>
+                <th>職稱</th>
+                <th class="sortable" onclick="sortBy('rank')">職級 <span class="sort-icon">↕</span></th>
+                <th>Q4 配置方式</th>
+                <th>Q5 偏好設備</th>
+                <th>Q6 預估數量</th>
+                <th class="sortable" onclick="sortBy('score')" title="點擊排序">評估分數 <span class="sort-icon">↕</span></th>
+                <th>建議配發筆電</th>
+                <th style="width:80px;">操作</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+          <div class="empty-state" id="emptyState" style="display:none;">
+            <div class="empty-icon">📭</div>
+            <p>找不到符合條件的資料</p>
+          </div>
+        </div>
+        <div class="pagination-bar" id="paginationBar"></div>
+      </div>
+
+    </div><!-- /page-body -->
+    </div><!-- /page-survey -->
+
+    <!-- 評分方式說明 -->
+    <div id="page-scoring" data-page="scoring" class="page-body score-page" style="display:none;">
+
+      <h1 class="section-h2" style="font-size:1.25rem;margin-bottom:4px;">評分方式說明</h1>
+      <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:28px;">系統依據填表人的回答，從四個維度計算 0–100 分，再加計調整項，最終產出是否建議配發筆電的建議。</p>
+
+      <!-- 四個維度概覽 -->
+      <div class="dim-grid">
+        <div class="dim-card">
+          <div style="font-size:1.4rem;margin-bottom:6px;">🏃</div>
+          <div style="font-weight:700;margin-bottom:4px;">A. 工作機動性</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">Q1 + Q3｜最高 35 分</div>
+        </div>
+        <div class="dim-card b">
+          <div style="font-size:1.4rem;margin-bottom:6px;">🌐</div>
+          <div style="font-weight:700;margin-bottom:4px;">B. 遠端系統存取</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">Q8｜最高 25 分</div>
+        </div>
+        <div class="dim-card c">
+          <div style="font-size:1.4rem;margin-bottom:6px;">🎒</div>
+          <div style="font-weight:700;margin-bottom:4px;">C. 外出攜帶情境</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">Q10｜最高 20 分</div>
+        </div>
+        <div class="dim-card d">
+          <div style="font-size:1.4rem;margin-bottom:6px;">📋</div>
+          <div style="font-weight:700;margin-bottom:4px;">D. 設備需求聲明</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">Q4 + Q5 + Q6｜最高 20 分</div>
+        </div>
+      </div>
+
+      <!-- A. 工作機動性 -->
+      <div class="scoring-card">
+        <div class="scoring-card-head">
+          <span class="scoring-card-icon">🏃</span>
+          <div>
+            <div class="scoring-card-title">A. 工作機動性（最高 35 分）</div>
+            <div class="scoring-card-sub">Q1 工作性質 + Q3 外出頻率</div>
+          </div>
+        </div>
+        <div style="padding:0 20px 20px;">
+          <table class="score-tbl">
+            <thead><tr><th>題目</th><th>選項</th><th style="text-align:right;">得分</th></tr></thead>
+            <tbody>
+              <tr><td rowspan="5">Q1 主要工作性質</td><td>A. 固定辦公桌作業</td><td style="text-align:right;"><span class="score-pts zero">0</span></td></tr>
+              <tr><td>B. 主要辦公室，偶有外出</td><td style="text-align:right;"><span class="score-pts zero">0</span></td></tr>
+              <tr><td>C. 頻繁於不同地點移動</td><td style="text-align:right;"><span class="score-pts high">20</span></td></tr>
+              <tr><td>D. 混合辦公（居家＋辦公室）</td><td style="text-align:right;"><span class="score-pts high">15</span></td></tr>
+              <tr><td>E. 主要在外部場域工作</td><td style="text-align:right;"><span class="score-pts">8</span></td></tr>
+              <tr style="border-top:2px solid var(--border);"><td rowspan="4">Q3 外出至公司外頻率</td><td>A. 幾乎不外出</td><td style="text-align:right;"><span class="score-pts zero">0</span></td></tr>
+              <tr><td>B. 偶爾（每月 1–3 次）</td><td style="text-align:right;"><span class="score-pts">5</span></td></tr>
+              <tr><td>C. 頻繁（每週 1–2 次）</td><td style="text-align:right;"><span class="score-pts">10</span></td></tr>
+              <tr><td>D. 非常頻繁（幾乎每天）</td><td style="text-align:right;"><span class="score-pts high">15</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- B. 遠端系統存取 -->
+      <div class="scoring-card">
+        <div class="scoring-card-head">
+          <span class="scoring-card-icon green">🌐</span>
+          <div>
+            <div class="scoring-card-title">B. 遠端系統存取（最高 25 分）</div>
+            <div class="scoring-card-sub">Q8 遠端連線需求</div>
+          </div>
+        </div>
+        <div style="padding:0 20px 20px;">
+          <table class="score-tbl">
+            <thead><tr><th>選項</th><th style="text-align:right;">得分</th></tr></thead>
+            <tbody>
+              <tr><td>A. 不需要遠端連線</td><td style="text-align:right;"><span class="score-pts zero">0</span></td></tr>
+              <tr><td>B. 偶爾需要（非必要）</td><td style="text-align:right;"><span class="score-pts">10</span></td></tr>
+              <tr><td>C. 經常需要（工作必要）</td><td style="text-align:right;"><span class="score-pts high">25</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- C. 外出攜帶情境 -->
+      <div class="scoring-card">
+        <div class="scoring-card-head">
+          <span class="scoring-card-icon yellow">🎒</span>
+          <div>
+            <div class="scoring-card-title">C. 外出攜帶情境（最高 20 分，可複選累計）</div>
+            <div class="scoring-card-sub">Q10 外出時需攜帶電腦的情境（上限 20 分）</div>
+          </div>
+        </div>
+        <div style="padding:0 20px 20px;">
+          <table class="score-tbl">
+            <thead><tr><th>情境</th><th style="text-align:right;">得分</th></tr></thead>
+            <tbody>
+              <tr><td>A. 不需要攜帶電腦</td><td style="text-align:right;"><span class="score-pts zero">0</span></td></tr>
+              <tr><td>B. 外部客戶拜訪／簡報</td><td style="text-align:right;"><span class="score-pts">8</span></td></tr>
+              <tr><td>C. 出差或長期外派</td><td style="text-align:right;"><span class="score-pts high">15</span></td></tr>
+              <tr><td>D. 院內跨部門移動作業</td><td style="text-align:right;"><span class="score-pts">10</span></td></tr>
+              <tr><td>E. 臨時任務或值班支援</td><td style="text-align:right;"><span class="score-pts">5</span></td></tr>
+              <tr style="background:var(--primary-light);"><td colspan="2" style="font-size:0.8rem;color:var(--text-muted);padding:8px 12px;">複選累計，最高上限 20 分</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- D. 設備需求聲明 -->
+      <div class="scoring-card">
+        <div class="scoring-card-head">
+          <span class="scoring-card-icon purple">📋</span>
+          <div>
+            <div class="scoring-card-title">D. 設備需求聲明（最高 20 分）</div>
+            <div class="scoring-card-sub">Q4 配置方式 + Q5 設備偏好 + Q6 需求數量</div>
+          </div>
+        </div>
+        <div style="padding:0 20px 20px;">
+          <table class="score-tbl">
+            <thead><tr><th>題目</th><th>選項</th><th style="text-align:right;">得分</th></tr></thead>
+            <tbody>
+              <tr><td rowspan="3">Q4 期望配置方式</td><td>A. 個人專屬</td><td style="text-align:right;"><span class="score-pts">5</span></td></tr>
+              <tr><td>B. 部門共用即可</td><td style="text-align:right;"><span class="score-pts zero">0</span></td></tr>
+              <tr><td>C. 暫無明確需求</td><td style="text-align:right;"><span class="score-pts">3</span></td></tr>
+              <tr style="border-top:2px solid var(--border);"><td rowspan="2">Q5 設備偏好</td><td>（含「B. 筆記型電腦」）</td><td style="text-align:right;"><span class="score-pts high">10</span></td></tr>
+              <tr><td>（未選筆電）</td><td style="text-align:right;"><span class="score-pts zero">0</span></td></tr>
+              <tr style="border-top:2px solid var(--border);"><td rowspan="4">Q6 需求設備台數</td><td>A. 不需要配置設備</td><td style="text-align:right;"><span class="score-pts zero">0</span></td></tr>
+              <tr><td>B. 1 台</td><td style="text-align:right;"><span class="score-pts">2</span></td></tr>
+              <tr><td>C. 2 台</td><td style="text-align:right;"><span class="score-pts">4</span></td></tr>
+              <tr><td>D. 3 台以上</td><td style="text-align:right;"><span class="score-pts">5</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 調整項 -->
+      <h2 class="section-h2">加減分調整項</h2>
+      <div class="scoring-card">
+        <div style="padding:20px;">
+          <table class="score-tbl">
+            <thead><tr><th>條件</th><th style="text-align:right;">調整</th></tr></thead>
+            <tbody>
+              <tr><td>職級為特級主管或一級主管</td><td style="text-align:right;"><span class="score-pts plus">＋10</span></td></tr>
+              <tr><td>Q2 目前無任何配置設備（選 F）</td><td style="text-align:right;"><span class="score-pts plus">＋5</span></td></tr>
+              <tr><td>Q5 僅選平板（非筆電）</td><td style="text-align:right;"><span class="score-pts minus">－15</span></td></tr>
+              <tr><td>Q6 自述不需要配置設備（選 A）</td><td style="text-align:right;"><span class="score-pts minus">－30</span></td></tr>
+              <tr><td>Q4 共用即可（B）且 Q3 幾乎不外出（A）</td><td style="text-align:right;"><span class="score-pts minus">－10</span></td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:10px;">※ 調整後總分限制在 0–100 分之間。</p>
+        </div>
+      </div>
+
+      <!-- 配發門檻 -->
+      <h2 class="section-h2">建議配發門檻</h2>
+      <div class="threshold-grid" style="margin-bottom:32px;">
+        <div class="threshold-item t1" style="border-radius:var(--radius);padding:16px 18px;">
+          <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px;">70–100 分</div>
+          <div style="font-weight:600;margin-bottom:2px;">強烈建議配發</div>
+          <div style="font-size:0.8rem;color:#166534;">需求明確、移動性高，優先配發</div>
+        </div>
+        <div class="threshold-item t2" style="border-radius:var(--radius);padding:16px 18px;">
+          <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px;">50–69 分</div>
+          <div style="font-weight:600;margin-bottom:2px;">建議配發（主管確認）</div>
+          <div style="font-size:0.8rem;color:#1e40af;">有一定需求，建議主管審核後配發</div>
+        </div>
+        <div class="threshold-item t3" style="border-radius:var(--radius);padding:16px 18px;">
+          <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px;">30–49 分</div>
+          <div style="font-weight:600;margin-bottom:2px;">需進一步評估</div>
+          <div style="font-size:0.8rem;color:#92400e;">需求不明確，建議與主管討論後再決定</div>
+        </div>
+        <div class="threshold-item t4" style="border-radius:var(--radius);padding:16px 18px;">
+          <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px;">0–29 分</div>
+          <div style="font-weight:600;margin-bottom:2px;">暫不建議配發</div>
+          <div style="font-size:0.8rem;color:#991b1b;">現有設備或共用設備已可滿足需求</div>
+        </div>
+      </div>
+
+    </div><!-- /page-scoring -->
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- Detail modal (右滑面板) -->
+<div class="modal-overlay" id="detailModal" onclick="handleModalClick(event)">
+  <div class="modal-panel" id="modalPanel">
+    <div class="modal-head">
+      <div class="modal-head-info">
+        <div class="name" id="mName"></div>
+        <div class="meta" id="mMeta"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <div class="modal-footer-label">建議配發筆電</div>
+      <div class="modal-footer-right">
+        <span class="submitted-at" id="mSubmittedAt"></span>
+        <span id="mLaptopBadge" class="score-badge"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm delete dialog -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-card">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">確認刪除？</div>
+    <div class="confirm-msg" id="confirmMsg">此動作無法復原，請確認是否刪除該筆資料。</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">取消</button>
+      <button class="btn-confirm-del" onclick="doDelete()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   評分系統
+══════════════════════════════════════════ */
+function calculateScore(r) {
+  let base = 0;
+  const breakdown = [];
+  const adjustments = [];
+
+  // ── A. 工作機動性 (最高 35 分) ──
+  const q1pts = { A:0, B:0, C:20, D:15, E:8 }[r.q1] ?? 0;
+  const q3pts = { A:0, B:5,  C:10, D:15 }[r.q3] ?? 0;
+  const aPts = q1pts + q3pts;
+  base += aPts;
+  breakdown.push({ label:'A. 工作機動性（Q1+Q3）', pts: aPts, max: 35 });
+
+  // ── B. 遠端系統存取需求 (最高 25 分) ──
+  const bPts = { A:0, B:10, C:25 }[r.q8] ?? 0;
+  base += bPts;
+  breakdown.push({ label:'B. 遠端系統存取（Q8）', pts: bPts, max: 25 });
+
+  // ── C. 外出攜帶設備情境 (多選累加，上限 20 分) ──
+  const q10map = { A:0, B:8, C:15, D:10, E:5 };
+  let cRaw = (r.q10 || []).reduce((s, v) => s + (q10map[v] ?? 0), 0);
+  const cPts = Math.min(cRaw, 20);
+  base += cPts;
+  breakdown.push({ label:'C. 外出攜帶情境（Q10）', pts: cPts, max: 20 });
+
+  // ── D. 設備需求聲明 (最高 20 分) ──
+  const q4pts = { A:5, B:0, C:3 }[r.q4] ?? 0;
+  const q5pts = (r.q5 || []).includes('B') ? 10 : 0;
+  const q6pts = { A:0, B:2, C:4, D:5 }[r.q6] ?? 0;
+  const dPts = q4pts + q5pts + q6pts;
+  base += dPts;
+  breakdown.push({ label:'D. 設備需求聲明（Q4+Q5+Q6）', pts: dPts, max: 20 });
+
+  // ── 加減分修正 ──
+  if (r.rank === '特級主管' || r.rank === '一級主管') {
+    adjustments.push({ label:'職級為特級／一級主管', delta: +10 });
+  }
+  const onlyTablet = (r.q5 || []).length > 0 && !(r.q5 || []).includes('B') && (r.q5 || []).includes('C') && !(r.q5 || []).includes('A');
+  if (onlyTablet) {
+    adjustments.push({ label:'Q5 僅選平板（非筆電需求）', delta: -15 });
+  }
+  if (r.q6 === 'A') {
+    adjustments.push({ label:'Q6 自述不需要配置設備', delta: -30 });
+  }
+  if (r.q4 === 'B' && r.q3 === 'A') {
+    adjustments.push({ label:'Q4 共用即可且 Q3 幾乎不外出', delta: -10 });
+  }
+  if ((r.q2 || []).includes('F')) {
+    adjustments.push({ label:'Q2 目前無任何配置設備', delta: +5 });
+  }
+
+  const adjTotal = adjustments.reduce((s, a) => s + a.delta, 0);
+  const total = Math.max(0, Math.min(100, base + adjTotal));
+
+  return { total, base, breakdown, adjustments, adjTotal };
+}
+
+function scoreVerdict(total) {
+  if (total >= 70) return { label:'強烈建議配發', cls:'score-high', laptop:'yes' };
+  if (total >= 50) return { label:'建議配發（主管確認）', cls:'score-mid', laptop:'yes' };
+  if (total >= 30) return { label:'需進一步評估', cls:'score-low', laptop:'pending' };
+  return { label:'暫不建議配發', cls:'score-none', laptop:'no' };
+}
+
+/* ══════════════════════════════════════════
+   Mock 資料
+══════════════════════════════════════════ */
+const Q4_LABELS = { A:'個人專屬', B:'共用設備', C:'部分個人' };
+const Q5_LABELS = { A:'桌上型', B:'筆記型', C:'平板', D:'不需個人' };
+const Q6_LABELS = { A:'不需配置', B:'1台', C:'2台', D:'2台以上' };
+const Q7_LABELS = { A:'HIS', B:'ERP', C:'網站後台', D:'電子公文', E:'KM', F:'電子簽核', G:'Office', H:'視訊會議', I:'設計工具', J:'其他' };
+const Q8_LABELS = { A:'僅辦公室', B:'偶爾遠端', C:'頻繁遠端' };
+const Q9_LABELS = { A:'無特殊軟體', B:'有特殊軟體' };
+const Q10_LABELS = { A:'不適用', B:'其他院區', C:'個案現場', D:'外部會議', E:'其他' };
+const Q11_LABELS = { A:'無特殊需求', B:'外接顯示器', C:'印表機/掃描機', D:'外接硬碟', E:'其他' };
+const Q12_LABELS = { A:'統一桌機', B:'需筆電', C:'需平板', D:'院端公共', E:'跨場域組合' };
+
+let records = [];
+
+async function loadRecords() {
+  try {
+    const resp = await fetch('/api/responses');
+    const data = await resp.json();
+    if (data.ok) {
+      records = data.records;
+      renderStats();
+      applyFilter();
+    } else {
+      showToast('⚠️', '無法載入資料：' + data.error, 'danger');
+    }
+  } catch (err) {
+    showToast('⚠️', '連線失敗，請重新整理', 'danger');
+  }
+}
+
+let filteredIds = records.map(r => r.id);
+let pendingDeleteId = null;
+let openModalId = null;
+let sortField = null;
+let sortAsc = true;
+let currentPage = 1;
+const PAGE_SIZE = 50;
+
+/* ══ Render ══ */
+function renderStats() {
+  const total = records.length;
+  const yes = records.filter(r => scoreVerdict(calculateScore(r).total).laptop === 'yes').length;
+  const no  = records.filter(r => scoreVerdict(calculateScore(r).total).laptop === 'no').length;
+  const pen = records.filter(r => scoreVerdict(calculateScore(r).total).laptop === 'pending').length;
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-icon blue">📋</div>
+      <div><div class="stat-value">${total}</div><div class="stat-label">問卷總份數</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">✅</div>
+      <div><div class="stat-value">${yes}</div><div class="stat-label">建議配發筆電</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon red">❌</div>
+      <div><div class="stat-value">${no}</div><div class="stat-label">不建議配發</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon yellow">⏳</div>
+      <div><div class="stat-value">${pen}</div><div class="stat-label">待評估</div></div>
+    </div>
+  `;
+}
+
+function rankClass(rank) {
+  if (rank === '特級主管') return 'rank-special';
+  if (rank === '一級主管') return 'rank-1';
+  if (rank === '二級主管') return 'rank-2';
+  return 'rank-general';
+}
+
+function chipColor(q, val) {
+  if (q === 'q5' && val === 'B') return 'green';
+  if (q === 'q6' && (val === 'C' || val === 'D')) return 'yellow';
+  return '';
+}
+
+function renderPagination(page, totalPages, total) {
+  const bar = document.getElementById('paginationBar');
+  if (totalPages <= 1) { bar.innerHTML = ''; return; }
+
+  const pages = [];
+  pages.push(1);
+  if (page > 3) pages.push('…');
+  for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+  if (page < totalPages - 2) pages.push('…');
+  if (totalPages > 1) pages.push(totalPages);
+
+  const btnHtml = pages.map(p =>
+    p === '…'
+      ? `<span class="page-ellipsis">…</span>`
+      : `<button class="page-btn${p === page ? ' active' : ''}" onclick="goToPage(${p})">${p}</button>`
+  ).join('');
+
+  bar.innerHTML = `
+    <span class="pagination-info">第 ${page} / ${totalPages} 頁，共 ${total} 筆</span>
+    <div class="pagination-btns">
+      <button class="page-btn" onclick="goToPage(${page - 1})" ${page === 1 ? 'disabled' : ''}>‹ 上一頁</button>
+      ${btnHtml}
+      <button class="page-btn" onclick="goToPage(${page + 1})" ${page === totalPages ? 'disabled' : ''}>下一頁 ›</button>
+    </div>`;
+}
+
+function goToPage(p) {
+  const totalPages = Math.max(1, Math.ceil(filteredIds.length / PAGE_SIZE));
+  currentPage = Math.max(1, Math.min(p, totalPages));
+  renderTable();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderTable() {
+  const body = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+  const allRows = filteredIds.map(id => records.find(r => r.id === id)).filter(Boolean);
+
+  if (allRows.length === 0) {
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    document.getElementById('filterCount').innerHTML = '';
+    document.getElementById('paginationBar').innerHTML = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const totalPages = Math.max(1, Math.ceil(allRows.length / PAGE_SIZE));
+  currentPage = Math.min(currentPage, totalPages);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const end   = Math.min(start + PAGE_SIZE, allRows.length);
+  const rows  = allRows.slice(start, end);
+
+  document.getElementById('filterCount').innerHTML =
+    `顯示 <strong>${start + 1}–${end}</strong>，共 <strong>${allRows.length}</strong> 筆`;
+
+  body.innerHTML = rows.map(r => {
+    const q5chips = r.q5.map(v =>
+      `<span class="chip ${v==='B'?'green':''}">${Q5_LABELS[v]||v}</span>`
+    ).join('');
+    const { total } = calculateScore(r);
+    const verdict = scoreVerdict(total);
+    return `
+      <tr id="row-${r.id}">
+        <td><span class="link-cell" onclick="openDetail(${r.id})">${r.name}</span></td>
+        <td><span class="link-cell" onclick="openDetail(${r.id})">${r.empId}</span></td>
+        <td>${r.dept}</td>
+        <td>${r.division}</td>
+        <td>${r.jobTitle}</td>
+        <td><span class="rank-badge ${rankClass(r.rank)}">${r.rank}</span></td>
+        <td><span class="chip ${r.q4==='A'?'':r.q4==='B'?'gray':'yellow'}">${Q4_LABELS[r.q4]||'-'}</span></td>
+        <td><div class="chip-wrap">${q5chips||'-'}</div></td>
+        <td><span class="chip ${r.q6==='A'?'gray':r.q6==='D'?'yellow':''}">${Q6_LABELS[r.q6]||'-'}</span></td>
+        <td>
+          <span class="score-badge ${verdict.cls}" title="${verdict.label}" onclick="openDetail(${r.id})" style="cursor:pointer;">
+            ${total} 分
+          </span>
+        </td>
+        <td>
+          <span class="score-badge ${verdict.cls}" style="font-size:0.76rem;">
+            ${verdict.label}
+          </span>
+        </td>
+        <td>
+          <button class="btn-del" onclick="confirmDelete(${r.id})">🗑 刪除</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  renderPagination(currentPage, totalPages, allRows.length);
+}
+
+/* ══ Filter ══ */
+function applyFilter() {
+  const q   = document.getElementById('searchInput').value.toLowerCase();
+  const dept = document.getElementById('filterDept').value;
+  const rank = document.getElementById('filterRank').value;
+  const lap  = document.getElementById('filterLaptop').value;
+
+  filteredIds = records
+    .filter(r => {
+      const matchQ = !q || [r.name,r.empId,r.division,r.jobTitle].some(v => v.toLowerCase().includes(q));
+      const matchD = !dept || r.dept === dept;
+      const matchR = !rank || r.rank === rank;
+      const matchL = !lap  || scoreVerdict(calculateScore(r).total).laptop === lap;
+      return matchQ && matchD && matchR && matchL;
+    })
+    .map(r => r.id);
+
+  currentPage = 1;
+  renderTable();
+}
+
+/* ══ Sort ══ */
+function sortBy(field) {
+  if (sortField === field) sortAsc = !sortAsc;
+  else { sortField = field; sortAsc = true; }
+
+  const rankOrder = { '特級主管':0,'一級主管':1,'二級主管':2,'一般同仁':3 };
+  filteredIds.sort((a, b) => {
+    const ra = records.find(r=>r.id===a);
+    const rb = records.find(r=>r.id===b);
+    let va = field==='rank'  ? rankOrder[ra.rank]??9
+           : field==='score' ? calculateScore(ra).total
+           : ra[field];
+    let vb = field==='rank'  ? rankOrder[rb.rank]??9
+           : field==='score' ? calculateScore(rb).total
+           : rb[field];
+    return sortAsc ? (va>vb?1:-1) : (va<vb?1:-1);
+  });
+  currentPage = 1;
+  renderTable();
+}
+
+/* ══ Delete ══ */
+function confirmDelete(id) {
+  const rec = records.find(r => r.id === id);
+  pendingDeleteId = id;
+  document.getElementById('confirmMsg').textContent =
+    `即將刪除「${rec.name}（${rec.empId}）」的問卷資料，此動作無法復原。`;
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+  pendingDeleteId = null;
+}
+async function doDelete() {
+  if (!pendingDeleteId) return;
+  const rec = records.find(r => r.id === pendingDeleteId);
+  try {
+    const resp = await fetch(`/api/delete/${pendingDeleteId}`, { method: 'DELETE' });
+    if (!resp.ok) throw new Error('刪除失敗');
+    records = records.filter(r => r.id !== pendingDeleteId);
+    filteredIds = filteredIds.filter(id => id !== pendingDeleteId);
+    closeConfirm();
+    if (openModalId === pendingDeleteId) closeModal();
+    renderStats();
+    renderTable();
+    showToast('🗑️', `已刪除「${rec.name}」的問卷資料`, 'danger');
+  } catch (err) {
+    showToast('⚠️', '刪除失敗，請稍後再試', 'danger');
+  }
+  pendingDeleteId = null;
+}
+
+/* ══ Detail modal ══ */
+function chips(arr, labels, q) {
+  if (!arr || arr.length === 0) return '<span style="color:var(--text-muted);font-style:italic">（未填）</span>';
+  return `<div class="chip-wrap">${arr.map(v =>
+    `<span class="chip ${chipColor(q,v)}">${labels[v]||v}</span>`
+  ).join('')}</div>`;
+}
+function val(v, labels) {
+  if (!v) return '<span style="color:var(--text-muted);font-style:italic">（未填）</span>';
+  return labels ? (labels[v]||v) : v;
+}
+
+function openDetail(id) {
+  const r = records.find(rec => rec.id === id);
+  if (!r) return;
+  openModalId = id;
+
+  document.getElementById('mName').textContent = r.name;
+  document.getElementById('mMeta').textContent =
+    `${r.dept} ／ ${r.division} ／ ${r.jobTitle}（${r.rank}）`;
+
+  const dt = new Date(r.submittedAt);
+  document.getElementById('mSubmittedAt').textContent =
+    `填表時間：${dt.toLocaleDateString('zh-TW')} ${dt.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}`;
+
+  const { total: mTotal } = calculateScore(r);
+  const mVerdict = scoreVerdict(mTotal);
+  const badge = document.getElementById('mLaptopBadge');
+  badge.textContent = mVerdict.label;
+  badge.className = `score-badge ${mVerdict.cls}`;
+
+  const q1Labels = { A:'固定辦公室', B:'院端共用電腦', C:'移動照護/外勤', D:'跨場域', E:'其他' };
+  const q3Labels = { A:'幾乎不需要（每月<1次）', B:'偶爾（每月1～3次）', C:'頻繁（每週1次以上）', D:'行動辦公為常態' };
+
+  // ── Score breakdown ──
+  const { total, base, breakdown, adjustments, adjTotal } = calculateScore(r);
+  const verdict = scoreVerdict(total);
+  const adjRows = adjustments.map(a => `
+    <div class="score-adj-row">
+      <span class="${a.delta > 0 ? 'adj-plus' : 'adj-minus'}">${a.delta > 0 ? '+' : ''}${a.delta}</span>
+      <span>${a.label}</span>
+    </div>`).join('') || `<div class="score-adj-row"><span style="color:var(--text-muted)">無加減分修正</span></div>`;
+
+  const scoreHTML = `
+    <div class="score-panel">
+      <div class="score-panel-head">
+        <div class="score-panel-title">🎯 筆記型電腦配發評估分數</div>
+        <div>
+          <span class="score-total-badge" style="color:${total>=70?'#15803d':total>=50?'#1d4ed8':total>=30?'#92400e':'#b91c1c'}">${total}</span>
+          <span style="font-size:0.85rem;color:var(--text-muted);font-weight:600;"> / 100</span>
+          <span class="score-verdict ${verdict.cls}">${verdict.label}</span>
+        </div>
+      </div>
+      <div class="score-rows">
+        ${breakdown.map(b => `
+          <div class="score-row">
+            <span class="score-row-label">${b.label}</span>
+            <div class="score-row-bar-bg"><div class="score-row-bar-fill" style="width:${Math.round(b.pts/b.max*100)}%"></div></div>
+            <span class="score-row-pts">${b.pts} <span style="color:var(--text-muted);font-weight:400">/ ${b.max}</span></span>
+          </div>`).join('')}
+      </div>
+      ${adjRows}
+    </div>`;
+
+  document.getElementById('modalBody').innerHTML = scoreHTML + `
+    <!-- 基本資料 -->
+    <div class="detail-section">
+      <div class="detail-section-title">📋 填表人基本資料</div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="lbl">姓名</div><div class="val">${r.name}</div></div>
+        <div class="detail-field"><div class="lbl">員工編號</div><div class="val">${r.empId}</div></div>
+        <div class="detail-field"><div class="lbl">所屬部門</div><div class="val">${r.dept}</div></div>
+        <div class="detail-field"><div class="lbl">所屬處室</div><div class="val">${r.division}</div></div>
+        <div class="detail-field"><div class="lbl">職稱</div><div class="val">${r.jobTitle}</div></div>
+        <div class="detail-field"><div class="lbl">職級</div><div class="val"><span class="rank-badge ${rankClass(r.rank)}">${r.rank}</span></div></div>
+        <div class="detail-field" style="grid-column:1/-1"><div class="lbl">主要辦公地點</div><div class="val">${r.location}</div></div>
+      </div>
+    </div>
+
+    <!-- PART A -->
+    <div class="detail-section">
+      <div class="detail-section-title">💼 PART A｜工作情境與設備使用現況</div>
+      <div class="qa-row">
+        <span class="qa-num">Q1</span>
+        <div class="qa-content">
+          <div class="qa-q">主要工作場域與設備使用情境</div>
+          <div class="qa-a">${val(r.q1, q1Labels)}</div>
+        </div>
+      </div>
+      <div class="qa-row">
+        <span class="qa-num multi">Q2</span>
+        <div class="qa-content">
+          <div class="qa-q">目前實際使用的主要設備類型（可複選）</div>
+          <div class="qa-a">${chips(r.q2, {A:'桌上型電腦',B:'筆記型電腦',C:'公共電腦',D:'平板電腦',E:'行動裝置(手機)',F:'無配置設備'})}</div>
+        </div>
+      </div>
+      <div class="qa-row">
+        <span class="qa-num">Q3</span>
+        <div class="qa-content">
+          <div class="qa-q">每週外出執行公務的頻率</div>
+          <div class="qa-a">${val(r.q3, q3Labels)}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PART B -->
+    <div class="detail-section">
+      <div class="detail-section-title">🖥️ PART B｜設備配置需求</div>
+      <div class="qa-row">
+        <span class="qa-num">Q4</span>
+        <div class="qa-content">
+          <div class="qa-q">個人專屬 vs 共用設備</div>
+          <div class="qa-a">${val(r.q4, Q4_LABELS)}</div>
+        </div>
+      </div>
+      <div class="qa-row">
+        <span class="qa-num multi">Q5</span>
+        <div class="qa-content">
+          <div class="qa-q">偏好設備類型（可複選）</div>
+          <div class="qa-a">${chips(r.q5, Q5_LABELS, 'q5')}</div>
+        </div>
+      </div>
+      <div class="qa-row">
+        <span class="qa-num">Q6</span>
+        <div class="qa-content">
+          <div class="qa-q">預估配置數量</div>
+          <div class="qa-a"><span class="chip ${r.q6==='D'?'yellow':''}">${val(r.q6, Q6_LABELS)}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PART C -->
+    <div class="detail-section">
+      <div class="detail-section-title">🔐 PART C｜系統存取與軟體需求</div>
+      <div class="qa-row">
+        <span class="qa-num multi">Q7</span>
+        <div class="qa-content">
+          <div class="qa-q">使用系統或平台（可複選）</div>
+          <div class="qa-a">${chips(r.q7, Q7_LABELS)}</div>
+        </div>
+      </div>
+      <div class="qa-row">
+        <span class="qa-num">Q8</span>
+        <div class="qa-content">
+          <div class="qa-q">主要辦公場所以外的系統存取需求</div>
+          <div class="qa-a">${val(r.q8, Q8_LABELS)}</div>
+        </div>
+      </div>
+      <div class="qa-row">
+        <span class="qa-num">Q9</span>
+        <div class="qa-content">
+          <div class="qa-q">特殊授權軟體</div>
+          <div class="qa-a">
+            ${val(r.q9, Q9_LABELS)}
+            ${r.q9Software ? `<div style="margin-top:4px;font-size:0.82rem;color:var(--text-muted);">📝 ${r.q9Software}</div>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PART D -->
+    <div class="detail-section">
+      <div class="detail-section-title">🖨️ PART D｜週邊配備與主管補充</div>
+      <div class="qa-row">
+        <span class="qa-num multi">Q10</span>
+        <div class="qa-content">
+          <div class="qa-q">攜帶設備至外部地點的情境（可複選）</div>
+          <div class="qa-a">${chips(r.q10, Q10_LABELS)}</div>
+        </div>
+      </div>
+      <div class="qa-row">
+        <span class="qa-num multi">Q11</span>
+        <div class="qa-content">
+          <div class="qa-q">外接設備或週邊需求（可複選）</div>
+          <div class="qa-a">${chips(r.q11, Q11_LABELS)}</div>
+        </div>
+      </div>
+      <div class="qa-row">
+        <span class="qa-num mgr">Q12</span>
+        <div class="qa-content">
+          <div class="qa-q">所轄團隊整體設備需求（主管填）</div>
+          <div class="qa-a">${r.q12 && r.q12.length ? chips(r.q12, Q12_LABELS) : '<span style="color:var(--text-muted);font-style:italic">（一般同仁免填）</span>'}</div>
+        </div>
+      </div>
+      <div class="qa-row">
+        <span class="qa-num opt">Q13</span>
+        <div class="qa-content">
+          <div class="qa-q">設備使用痛點與補充說明（選填）</div>
+          <div class="qa-a">${r.q13 || '<span style="color:var(--text-muted);font-style:italic">（未填寫）</span>'}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('detailModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('detailModal').classList.remove('open');
+  document.body.style.overflow = '';
+  openModalId = null;
+}
+function handleModalClick(e) {
+  if (e.target === document.getElementById('detailModal')) closeModal();
+}
+
+/* ══ Sidebar ══ */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function navigate(page) {
+  document.querySelectorAll('[data-page]').forEach(el => {
+    el.style.display = el.dataset.page === page ? '' : 'none';
+  });
+  document.querySelectorAll('.nav-item[data-nav]').forEach(el => {
+    el.classList.toggle('active', el.dataset.nav === page);
+  });
+  const labels = { survey: '問卷回覆管理', scoring: '評分方式說明' };
+  document.getElementById('pageBreadcrumb').textContent = labels[page] || page;
+  document.getElementById('btnExport').style.display = page === 'survey' ? '' : 'none';
+  closeSidebar();
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+/* ══ Toast ══ */
+function showToast(icon, msg, type='') {
+  const wrap = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  wrap.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 2400);
+}
+
+/* ══ Export CSV ══ */
+function exportCSV() {
+  const headers = ['姓名','員工編號','部門','處室','職稱','職級','辦公地點','Q4配置方式','Q5設備偏好','Q6數量','建議配發筆電'];
+  const rows = records.map(r => [
+    r.name, r.empId, r.dept, r.division, r.jobTitle, r.rank, r.location,
+    Q4_LABELS[r.q4]||'', r.q5.map(v=>Q5_LABELS[v]).join('|'), Q6_LABELS[r.q6]||'', laptopLabel(r.laptop)
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿'+csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = '公務電腦需求盤點_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('⬇', 'CSV 已匯出', 'success');
+}
+
+/* ══ Keyboard ══ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeConfirm(); }
+});
+
+/* ══ Init ══ */
+loadRecords();
+</script>
+</body>
+</html>
