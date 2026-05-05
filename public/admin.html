@@ -587,6 +587,7 @@
     .score-mid    { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
     .score-low    { background: var(--warn-light); color: #92400e; border: 1px solid #fcd34d; }
     .score-none   { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .score-has    { background: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; }
 
     /* Score breakdown in modal */
     .score-panel {
@@ -970,6 +971,7 @@
           <option value="">建議配發：全部</option>
           <option value="yes">是</option>
           <option value="no">否</option>
+          <option value="has">已有筆電</option>
           <option value="pending">待評估</option>
         </select>
         <span class="filter-count" id="filterCount"></span>
@@ -1345,6 +1347,14 @@ function scoreVerdict(total) {
   return { label:'暫不建議配發', cls:'score-none', laptop:'no' };
 }
 
+// 包含 Q2=B（已有筆電）的優先判斷
+function getVerdict(r) {
+  if ((r.q2 || []).includes('B')) {
+    return { label:'已有筆電', cls:'score-has', laptop:'has' };
+  }
+  return scoreVerdict(calculateScore(r).total);
+}
+
 /* ══════════════════════════════════════════
    Mock 資料
 ══════════════════════════════════════════ */
@@ -1387,9 +1397,10 @@ const PAGE_SIZE = 50;
 /* ══ Render ══ */
 function renderStats() {
   const total = records.length;
-  const yes = records.filter(r => scoreVerdict(calculateScore(r).total).laptop === 'yes').length;
-  const no  = records.filter(r => scoreVerdict(calculateScore(r).total).laptop === 'no').length;
-  const pen = records.filter(r => scoreVerdict(calculateScore(r).total).laptop === 'pending').length;
+  const yes = records.filter(r => getVerdict(r).laptop === 'yes').length;
+  const no  = records.filter(r => getVerdict(r).laptop === 'no').length;
+  const pen = records.filter(r => getVerdict(r).laptop === 'pending').length;
+  const has = records.filter(r => getVerdict(r).laptop === 'has').length;
   document.getElementById('statsRow').innerHTML = `
     <div class="stat-card">
       <div class="stat-icon blue">📋</div>
@@ -1406,6 +1417,10 @@ function renderStats() {
     <div class="stat-card">
       <div class="stat-icon yellow">⏳</div>
       <div><div class="stat-value">${pen}</div><div class="stat-label">待評估</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#f3f4f6;color:#4b5563;">💻</div>
+      <div><div class="stat-value">${has}</div><div class="stat-label">已有筆電</div></div>
     </div>
   `;
 }
@@ -1484,7 +1499,7 @@ function renderTable() {
       `<span class="chip ${v==='B'?'green':''}">${Q5_LABELS[v]||v}</span>`
     ).join('');
     const { total } = calculateScore(r);
-    const verdict = scoreVerdict(total);
+    const verdict = getVerdict(r);
     return `
       <tr id="row-${r.id}">
         <td><span class="link-cell" onclick="openDetail(${r.id})">${r.name}</span></td>
@@ -1528,7 +1543,7 @@ function applyFilter() {
       const matchQ = !q || [r.name,r.empId,r.division,r.jobTitle].some(v => v.toLowerCase().includes(q));
       const matchD = !dept || r.dept === dept;
       const matchR = !rank || r.rank === rank;
-      const matchL = !lap  || scoreVerdict(calculateScore(r).total).laptop === lap;
+      const matchL = !lap  || getVerdict(r).laptop === lap;
       return matchQ && matchD && matchR && matchL;
     })
     .map(r => r.id);
@@ -1615,7 +1630,7 @@ function openDetail(id) {
     `填表時間：${dt.toLocaleDateString('zh-TW')} ${dt.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}`;
 
   const { total: mTotal } = calculateScore(r);
-  const mVerdict = scoreVerdict(mTotal);
+  const mVerdict = getVerdict(r);
   const badge = document.getElementById('mLaptopBadge');
   badge.textContent = mVerdict.label;
   badge.className = `score-badge ${mVerdict.cls}`;
@@ -1625,7 +1640,7 @@ function openDetail(id) {
 
   // ── Score breakdown ──
   const { total, base, breakdown, adjustments, adjTotal } = calculateScore(r);
-  const verdict = scoreVerdict(total);
+  const verdict = getVerdict(r);
   const adjRows = adjustments.map(a => `
     <div class="score-adj-row">
       <span class="${a.delta > 0 ? 'adj-plus' : 'adj-minus'}">${a.delta > 0 ? '+' : ''}${a.delta}</span>
@@ -1834,7 +1849,7 @@ function exportCSV() {
   const headers = ['姓名','員工編號','部門','處室','職稱','職級','辦公地點','Q4配置方式','Q5設備偏好','Q6數量','建議配發筆電'];
   const rows = records.map(r => [
     r.name, r.empId, r.dept, r.division, r.jobTitle, r.rank, r.location,
-    Q4_LABELS[r.q4]||'', r.q5.map(v=>Q5_LABELS[v]).join('|'), Q6_LABELS[r.q6]||'', laptopLabel(r.laptop)
+    Q4_LABELS[r.q4]||'', r.q5.map(v=>Q5_LABELS[v]).join('|'), Q6_LABELS[r.q6]||'', getVerdict(r).label
   ]);
   const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
   const blob = new Blob(['﻿'+csv], { type: 'text/csv;charset=utf-8;' });
