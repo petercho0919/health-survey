@@ -37,6 +37,106 @@
       min-height: 100vh;
     }
 
+    /* ══ Login overlay ══ */
+    #loginOverlay {
+      position: fixed; inset: 0;
+      background: linear-gradient(135deg, #004370 0%, #005b8e 50%, #00a878 100%);
+      z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #loginOverlay.hidden { display: none; }
+    .login-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 44px 40px 36px;
+      width: 100%; max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+    .login-logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .login-logo .login-icon {
+      width: 56px; height: 56px;
+      background: var(--primary-light);
+      border-radius: 14px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 12px;
+    }
+    .login-logo h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .login-logo p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .login-field { margin-bottom: 16px; }
+    .login-field label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.03em;
+    }
+    .login-field input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .login-field input:focus { border-color: var(--primary); }
+    .login-field input.err { border-color: var(--danger); }
+    .login-err {
+      font-size: 0.82rem;
+      color: var(--danger);
+      margin-top: 4px;
+      display: none;
+    }
+    .login-err.show { display: block; }
+    .login-btn {
+      width: 100%;
+      padding: 11px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.15s;
+    }
+    .login-btn:hover { background: var(--primary-dark); }
+    .login-btn:active { transform: scale(0.98); }
+
+    /* ══ Logout button ══ */
+    .btn-logout {
+      background: none;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      color: rgba(255,255,255,0.85);
+      border-radius: 7px;
+      padding: 5px 14px;
+      font-size: 0.82rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-logout:hover {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+
     /* ══ Layout shell ══ */
     .shell { display: flex; min-height: 100vh; }
 
@@ -889,6 +989,29 @@
 </head>
 <body>
 
+<!-- ══ Login Overlay ══ -->
+<div id="loginOverlay">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-icon">🔒</div>
+      <h2>後台管理系統</h2>
+      <p>公務電腦需求盤點｜請先登入</p>
+    </div>
+    <div class="login-field">
+      <label>帳號</label>
+      <input type="text" id="loginUser" placeholder="請輸入帳號"
+             autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <div class="login-field">
+      <label>密碼</label>
+      <input type="password" id="loginPass" placeholder="請輸入密碼"
+             autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" />
+      <div class="login-err" id="loginErr">帳號或密碼錯誤，請重新輸入</div>
+    </div>
+    <button class="login-btn" onclick="doLogin()">登 入</button>
+  </div>
+</div>
+
 <div class="shell">
 
   <!-- Sidebar -->
@@ -935,6 +1058,7 @@
       </div>
       <div class="topbar-right">
         <button class="topbar-export" id="btnExport" onclick="exportCSV()">⬇ 匯出 CSV</button>
+        <button class="btn-logout" onclick="doLogout()">登出</button>
       </div>
     </div>
 
@@ -1903,8 +2027,60 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeModal(); closeConfirm(); }
 });
 
+/* ══ Login / Logout ══ */
+const LOGIN_USER = 'peter';
+const LOGIN_PASS = '12345';
+const SESSION_KEY = 'admin_authed';
+
+function checkLogin() {
+  if (sessionStorage.getItem(SESSION_KEY) === '1') {
+    document.getElementById('loginOverlay').classList.add('hidden');
+    loadRecords();
+  } else {
+    // overlay 預設顯示，把主殼隱形等登入完成
+    document.querySelector('.shell').style.visibility = 'hidden';
+    setTimeout(() => document.getElementById('loginUser').focus(), 100);
+  }
+}
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginErr');
+  const userEl = document.getElementById('loginUser');
+  const passEl = document.getElementById('loginPass');
+
+  if (u === LOGIN_USER && p === LOGIN_PASS) {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.querySelector('.shell').style.visibility = '';
+    errEl.classList.remove('show');
+    userEl.classList.remove('err');
+    passEl.classList.remove('err');
+    loadRecords();
+  } else {
+    errEl.classList.add('show');
+    userEl.classList.add('err');
+    passEl.classList.add('err');
+    passEl.value = '';
+    passEl.focus();
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginErr').classList.remove('show');
+  document.getElementById('loginUser').classList.remove('err');
+  document.getElementById('loginPass').classList.remove('err');
+  document.querySelector('.shell').style.visibility = 'hidden';
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  setTimeout(() => document.getElementById('loginUser').focus(), 100);
+}
+
 /* ══ Init ══ */
-loadRecords();
+checkLogin();
 </script>
 </body>
 </html>
