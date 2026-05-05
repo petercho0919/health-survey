@@ -1846,12 +1846,50 @@ function showToast(icon, msg, type='') {
 
 /* ══ Export CSV ══ */
 function exportCSV() {
-  const headers = ['姓名','員工編號','部門','處室','職稱','職級','辦公地點','Q4配置方式','Q5設備偏好','Q6數量','建議配發筆電'];
-  const rows = records.map(r => [
-    r.name, r.empId, r.dept, r.division, r.jobTitle, r.rank, r.location,
-    Q4_LABELS[r.q4]||'', r.q5.map(v=>Q5_LABELS[v]).join('|'), Q6_LABELS[r.q6]||'', getVerdict(r).label
-  ]);
-  const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const Q1_LABELS = { A:'固定辦公室', B:'院端共用電腦', C:'移動照護/外勤', D:'跨場域', E:'其他' };
+  const Q3_LABELS = { A:'幾乎不需要（每月<1次）', B:'偶爾（每月1～3次）', C:'頻繁（每週1次以上）', D:'行動辦公為常態' };
+  const arrLabel = (arr, map) => (arr||[]).map(v => map[v]||v).join('|');
+  const headers = [
+    '填表時間',
+    '姓名','員工編號','部門','處室','職稱','職級','辦公地點','其他地點說明',
+    'Q1 主要工作場域','Q1 其他說明',
+    'Q2 目前使用設備',
+    'Q3 外出頻率',
+    'Q4 配置方式',
+    'Q5 偏好設備類型',
+    'Q6 預估數量',
+    'Q7 使用系統','Q7 其他說明',
+    'Q8 遠端存取需求',
+    'Q9 特殊軟體','Q9 軟體說明',
+    'Q10 攜帶情境','Q10 其他說明',
+    'Q11 週邊需求','Q11 其他說明',
+    'Q12 所轄團隊設備需求',
+    'Q13 補充說明',
+    '評估分數','建議配發筆電'
+  ];
+  const rows = records.map(r => {
+    const dt = new Date(r.submittedAt);
+    const submittedStr = `${dt.toLocaleDateString('zh-TW')} ${dt.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}`;
+    return [
+      submittedStr,
+      r.name, r.empId, r.dept, r.division, r.jobTitle, r.rank, r.location, r.locationOther||'',
+      Q1_LABELS[r.q1]||r.q1||'', r.q1Other||'',
+      arrLabel(r.q2, {A:'桌上型電腦',B:'筆記型電腦',C:'公共電腦',D:'平板電腦',E:'行動裝置(手機)',F:'無配置設備'}),
+      Q3_LABELS[r.q3]||r.q3||'',
+      Q4_LABELS[r.q4]||'',
+      arrLabel(r.q5, Q5_LABELS),
+      Q6_LABELS[r.q6]||'',
+      arrLabel(r.q7, Q7_LABELS), r.q7Other||'',
+      Q8_LABELS[r.q8]||'',
+      Q9_LABELS[r.q9]||'', r.q9Software||'',
+      arrLabel(r.q10, Q10_LABELS), r.q10Other||'',
+      arrLabel(r.q11, Q11_LABELS), r.q11Other||'',
+      arrLabel(r.q12, Q12_LABELS),
+      r.q13||'',
+      calculateScore(r).total, getVerdict(r).label
+    ];
+  });
+  const csv = [headers, ...rows].map(row => row.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob(['﻿'+csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url;
