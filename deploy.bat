@@ -1,16 +1,15 @@
 @echo off
-chcp 65001 >nul
-cd /d "C:\Peter Claude 工作資料夾\health-survey"
+cd /d C:\PETERC~1\HEALTH~1
 
-echo === 正在部署到 Vercel ===
-echo.
-
+echo === Git commit ^& push ===
 git add -A
-git commit -m "update: 更新內容"
+git commit -m "update"
 git push
 
+echo.
+echo === Deploy to Vercel ===
 node --require ./patch-hostname.js "C:\Users\choyc\AppData\Roaming\npm\node_modules\vercel\dist\index.js" deploy --prod --yes
 
 echo.
-echo === 部署完成 ===
+echo === Done ===
 pause
